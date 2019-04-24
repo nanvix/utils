@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 # Memory Size
-MEMSIZE=4M
+MEMSIZE=128M
 
 # Number of Cores
 NCORES=5

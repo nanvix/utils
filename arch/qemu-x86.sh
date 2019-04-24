@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 # Memory Size
-MEMSIZE=4M
+MEMSIZE=128M
 
 #
 # Runs a binary in the QEMU x86 target.
