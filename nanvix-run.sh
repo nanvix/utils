@@ -98,6 +98,7 @@ fi
 # Verbose mode.
 if [[ ! -z $VERBOSE ]];
 then
+	echo "==============================================================================="
 	echo "SCRIPT_DIR  = $SCRIPT_DIR"
 	echo "SCRIPT_NAME = $SCRIPT_NAME"
 	echo "IMAGE       = $IMAGE"
@@ -106,6 +107,7 @@ then
 	echo "VARIANT     = $VARIANT"
 	echo "MODE        = $MODE"
 	echo "ARGS        = $ARGS"
+	echo "==============================================================================="
 fi
 
 # Source target configuration
