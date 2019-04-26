@@ -47,7 +47,7 @@ function run
 			-mem-prealloc      \
 			-smp $NCORES
 	else
-		qemu-system-or1k    \
+		qemu-system-or1k -s \
 			-kernel $binary \
 			-serial stdio   \
 			-display none   \

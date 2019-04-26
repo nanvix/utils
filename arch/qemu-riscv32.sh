@@ -48,13 +48,13 @@ function run
 			-mem-prealloc         \
 			-smp $NCORES
 	else
-		qemu-system-riscv32 \
-			-machine virt   \
-			-kernel $binary \
-			-serial stdio   \
-			-display none   \
-			-m $MEMSIZE     \
-			-mem-prealloc   \
+		qemu-system-riscv32 -s \
+			-machine virt      \
+			-kernel $binary    \
+			-serial stdio      \
+			-display none      \
+			-m $MEMSIZE        \
+			-mem-prealloc      \
 			-smp $NCORES
 	fi
 }

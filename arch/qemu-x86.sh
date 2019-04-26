@@ -42,7 +42,7 @@ function run
 			-m $MEMSIZE        \
 			-mem-prealloc
 	else
-		qemu-system-i386     \
+		qemu-system-i386 -s  \
 			--display curses \
 			-kernel $binary  \
 			-m $MEMSIZE      \
