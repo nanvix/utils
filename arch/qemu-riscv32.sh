@@ -36,6 +36,7 @@ function run
 	local target=$3
 	local variant=$4
 	local mode=$5
+	local timeout=$6
 		
 	if [ $mode == "--debug" ];
 	then
@@ -48,13 +49,27 @@ function run
 			-mem-prealloc         \
 			-smp $NCORES
 	else
-		qemu-system-riscv32 -s \
-			-machine virt      \
-			-kernel $binary    \
-			-serial stdio      \
-			-display none      \
-			-m $MEMSIZE        \
-			-mem-prealloc      \
-			-smp $NCORES
+		if [ -n $timeout ];
+		then
+			timeout --foreground  $TIMEOUT \
+			qemu-system-riscv32 -s \
+				-machine virt      \
+				-kernel $binary    \
+				-serial stdio      \
+				-display none      \
+				-m $MEMSIZE        \
+				-mem-prealloc      \
+				-smp $NCORES       \
+			| tee $OUTFILE
+		else
+			qemu-system-riscv32 -s \
+				-machine virt      \
+				-kernel $binary    \
+				-serial stdio      \
+				-display none      \
+				-m $MEMSIZE        \
+				-mem-prealloc      \
+				-smp $NCORES
+		fi
 	fi
 }

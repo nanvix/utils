@@ -33,6 +33,7 @@ function run
 	local target=$3
 	local variant=$4
 	local mode=$5
+	local timeout=$6
 		
 	if [ $mode == "--debug" ];
 	then

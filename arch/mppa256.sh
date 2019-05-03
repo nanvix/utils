@@ -34,7 +34,8 @@ function run
 	local target=$3
 	local variant=$4
 	local mode=$5
-	local args=$6
+	local timeout=$6
+	local args=$7
 	local execfile=""
 
 	case $variant in

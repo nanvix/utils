@@ -28,11 +28,15 @@ BINARY=$2   # Binary
 TARGET=$3   # Target
 VARIANT=$4  # Target Variant
 MODE=$5     # Run Mode
-ARGS=$6     # Image Arguments
+TIMEOUT=$6  # Timeout
+ARGS=$7     # Image Arguments
 
-# Variables
+# Local Variables
 SCRIPT_NAME=$0
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
+
+# Global Variables
+export OUTFILE="nanvix-run.output"
 
 #==============================================================================
 # usage()
@@ -106,7 +110,9 @@ then
 	echo "TARGET      = $TARGET"
 	echo "VARIANT     = $VARIANT"
 	echo "MODE        = $MODE"
+	echo "TIMEOUT     = $TIMEOUT"
 	echo "ARGS        = $ARGS"
+	echo "OUTFILE     = $OUTFILE"
 	echo "==============================================================================="
 fi
 
@@ -124,4 +130,5 @@ case "$TARGET" in
 		;;
 esac
 
-run $IMAGE $BINARY $TARGET $VARIANT $MODE $ARGS
+rm -f $OUTFILE
+run $IMAGE $BINARY $TARGET $VARIANT $MODE $TIMEOUT $ARGS
