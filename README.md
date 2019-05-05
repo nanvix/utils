@@ -17,10 +17,13 @@ following tools are hereby shipped:
 License & Maintainers
 ---------------------
 
-Nanvix is a free operating system that is distributed under the [MIT
-License](https://raw.githubusercontent.com/nanvix/hal/master/LICENSE).
-It was created by [Pedro Henrique
-Penna](mailto:pedrohenriquepenna@gmail.com), but it is now maintained
+[Nanvix](https://github.com/nanvix) is a general purpose operating
+system for lightweight manycore platforms. It is free and its source
+code is distributed under the permissive [MIT
+License](https://en.wikipedia.org/wiki/MIT_License).  Nanvix was
+designed by [Pedro Henrique
+Penna](mailto:pedrohenriquepenna@gmail.com), but it is also maintained
 by many others. If you are interested in contacting any of the
-contributors, take a look in the complete [list of contributors of
+contributors of this project, take a look in the complete [list of
+contributors of
 Nanvix](https://raw.githubusercontent.com/nanvix/people/master/CREDITS).
