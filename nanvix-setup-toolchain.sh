@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# Copyright(c) 2018 Pedro Henrique Penna <pedrohenriquepenna@gmail.com>
+# Copyright(c) 2011-2019 The Maintainers of Nanvix
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,20 +22,9 @@
 # SOFTWARE.
 #
 
-# Script Arguments
-IMAGE=$1    # Image
-BINDIR=$2   # Binary Directory
-BINARY=$3   # Binary
-TARGET=$4   # Target
-VARIANT=$5  # Target Variant
-MODE=$6     # Run Mode
-TIMEOUT=$7  # Timeout
-ARGS=$8     # Image Arguments
-
 # Global Variables
 export SCRIPT_NAME=$0
 export SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
-export OUTFILE="nanvix-run.output"
 
 #==============================================================================
 # usage()
@@ -46,7 +35,7 @@ export OUTFILE="nanvix-run.output"
 #
 function usage
 {
-	echo "$SCRIPT_NAME <image> <binary> <target> <target variant> [mode]"
+	echo "$SCRIPT_NAME <bindir> <binary> <image>"
 	exit 1
 }
 
@@ -59,64 +48,16 @@ function usage
 #
 function check_args
 {
-	# Missing image?
-	if [ -z $IMAGE ];
-	then
-		echo "$SCRIPT_NAME: missing image"
-		usage
-	fi
-
-	# Missing binary?
-	if [ -z $IMAGE ];
-	then
-		echo "$SCRIPT_NAME: missing image"
-		usage
-	fi
-
-	# Missing target?
-	if [ -z $TARGET ];
-	then
+	# Missing target.
+	if [ -z $TARGET ]; then
 		echo "$SCRIPT_NAME: missing target"
-		usage
+		exit 1
 	fi
-
-	case $VARIANT in
-		"--all" | "--iocluster" | "--ccluster")
-			;;
-		*)
-			echo "$SCRIPT_NAME: bad target variant [--all | --iocluster | --ccluster]"
-			exit 1
-			;;
-	esac
 }
 
 #==============================================================================
 
-# No debug mode.
-if [ -z $MODE ];
-then
-	MODE="--no-debug"
-fi
-
-# Verbose mode.
-if [[ ! -z $VERBOSE ]];
-then
-	echo "==============================================================================="
-	echo "SCRIPT_DIR  = $SCRIPT_DIR"
-	echo "SCRIPT_NAME = $SCRIPT_NAME"
-	echo "TARGET      = $TARGET"
-	echo "VARIANT     = $VARIANT"
-	echo "IMAGE       = $IMAGE"
-	echo "BINDIR      = $BINDIR"
-	echo "BINARY      = $BINARY"
-	echo "MODE        = $MODE"
-	echo "TIMEOUT     = $TIMEOUT"
-	echo "ARGS        = $ARGS"
-	echo "OUTFILE     = $OUTFILE"
-	echo "==============================================================================="
-fi
-
-# Source target configuration
+# Source Target Configuration
 case "$TARGET" in
 	"qemu-x86"      | \
 	"qemu-openrisc" | \
@@ -130,5 +71,5 @@ case "$TARGET" in
 		;;
 esac
 
-rm -f $OUTFILE
-run $IMAGE $BINDIR $BINARY $TARGET $VARIANT $MODE $TIMEOUT $ARGS
+function setup_toolchain
+

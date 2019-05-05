@@ -20,52 +20,118 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Memory Size
-MEMSIZE=128M
-
-# Number of Cores
-NCORES=2
+#
+# Sets up development tools.
+#
+function setup_toolchain
+{
+	# Required variables.
+	local CURDIR=`pwd`
+	local WORKDIR=$CURDIR/tools/toolchain/or1k
+	local PREFIX=$WORKDIR
+	local TARGET=or1k-elf
+	local COMMIT=5b661a015490505201e21284914a169bcdad877e
+	
+	# Retrieve the number of processor cores
+	local NCORES=`grep -c ^processor /proc/cpuinfo`
+	
+	mkdir -p $WORKDIR
+	cd $WORKDIR
+	
+	# Get toolchain.
+	wget "https://github.com/nanvix/toolchain/archive/$COMMIT.zip"
+	unzip $COMMIT.zip
+	mv toolchain-$COMMIT/* .
+	
+	# Cleanup.
+	rm -rf toolchain-$COMMIT
+	rm -rf $COMMIT.zip
+	
+	# Build binutils and GDB.
+	cd binutils*/
+	./configure --target=$TARGET --prefix=$PREFIX --disable-nls --disable-sim --with-auto-load-safe-path=/ --enable-tui --with-guile=no
+	make -j $NCORES all
+	make install
+	
+	# Cleanup.
+	cd $WORKDIR
+	rm -rf binutils*
+	
+	# Build GCC.
+	cd gcc*/
+	./contrib/download_prerequisites
+	mkdir build
+	cd build
+	../configure --target=$TARGET --prefix=$PREFIX --disable-nls --enable-languages=c --without-headers
+	make -j $NCORES all-gcc
+	make -j $NCORES all-target-libgcc
+	make install-gcc
+	make install-target-libgcc
+	
+	# Cleanup.
+	cd $WORKDIR
+	rm -rf gcc*
+	
+	# Back to the current folder
+	cd $CURDIR
+}
 
 #
-# Runs a binary in the QEMU OpenRISC target.
+# Builds system image.
+#
+function build
+{
+	# Nothing to do.
+	echo ""
+}
+
+#
+# Runs a binary in the platform (simulator).
 #
 function run
 {
 	local image=$1
-	local binary=$2
-	local target=$3
-	local variant=$4
-	local mode=$5
-	local timeout=$6
+	local bindir=$2
+	local binary=$3
+	local target=$4
+	local variant=$5
+	local mode=$6
+	local timeout=$7
+
+	# Target configuration.
+	local MEMSIZE=128M # Memory Size
+	local NCORES=2     # Number of Cores
+
+	echo "timeout=$timeout"
 		
 	if [ $mode == "--debug" ];
 	then
-		qemu-system-or1k -s -S \
-			-kernel $binary    \
-			-serial stdio      \
-			-display none      \
-			-m $MEMSIZE        \
-			-mem-prealloc      \
+		qemu-system-or1k -s -S      \
+			-kernel $bindir/$binary \
+			-serial stdio           \
+			-display none           \
+			-m $MEMSIZE             \
+			-mem-prealloc           \
 			-smp $NCORES
 	else
-		if [ -n $timeout ];
+		if [ ! -z $timeout ];
 		then
-			timeout --foreground $TIMEOUT    \
-			qemu-system-or1k -s \
-				-kernel $binary \
-				-serial stdio   \
-				-display none   \
-				-m $MEMSIZE     \
-				-mem-prealloc   \
-				-smp $NCORES    \
+			timeout --foreground $timeout \
+			qemu-system-or1k -s           \
+				-kernel $bindir/$binary   \
+				-serial stdio             \
+				-display none             \
+				-m $MEMSIZE               \
+				-mem-prealloc             \
+				-smp $NCORES              \
 			| tee $OUTFILE
 		else
-			qemu-system-or1k -s \
-				-kernel $binary \
-				-serial stdio   \
-				-display none   \
-				-m $MEMSIZE     \
-				-mem-prealloc   \
+			qemu-system-or1k -s         \
+				-kernel $bindir/$binary \
+				-serial stdio           \
+				-display none           \
+				-m $MEMSIZE             \
+				-mem-prealloc           \
 				-smp $NCORES
 		fi
 	fi

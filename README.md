@@ -1,13 +1,18 @@
-Utilities for Nanvix
-====================
+Development Utilities for Nanvix
+=================================
 [![Join us on Slack!](https://img.shields.io/badge/chat-on%20Slack-e01563.svg)](https://join.slack.com/t/nanvix/shared_invite/enQtMzY2Nzg5OTQ4NTAyLTAxMmYwOGQ0ZmU2NDg2NTJiMWU1OWVkMWJhMWY4NzMzY2E1NTIyMjNiOTVlZDFmOTcyMmM2NDljMTAzOGI1NGY)
 
 What Is This Project About?
 ---------------------------
 
-This repository some development utilities for Nanvix:
+This repository hosts the standard Development Utilities for Nanvix. The
+following tools are hereby shipped:
 
-- `nanvix-run.sh`: runs a binary image in a target
+- `nanvix-build-image.sh`: builds system images
+- `nanvix-run.sh`: runs system images in a target
+- `nanvix-setup-prerequisites.sh`: installs prerequisites for building the toolchains
+- `nanvix-setup-qemu.sh`: builds the simulator of  a target
+- `nanvix-setup-toolchain.sh`: builds the toolchain of a target
 
 License & Maintainers
 ---------------------

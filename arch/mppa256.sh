@@ -25,17 +25,43 @@
 export K1_TOOLCHAIN_DIR="/usr/local/k1tools"
 
 #
-# Runs a binary in the MPPA-256 target.
+# Sets up development tools.
+#
+function setup_toolchain
+{
+	# Nothing to do.
+	echo ""
+}
+
+#
+# Builds system image.
+#
+function build
+{
+	local bindir=$1
+	local iobin=$2
+	local nodebin=$3
+	local image=$4
+
+	$K1_TOOLCHAIN_DIR/bin/k1-create-multibinary \
+		--boot $bindir/$iobin                   \
+		--clusters $bindir/$nodebin             \
+		-T $image
+}
+
+#
+# Runs a binary in the platform.
 #
 function run
 {
-	local multibin=$1
-	local bin=$2
-	local target=$3
-	local variant=$4
-	local mode=$5
-	local timeout=$6
-	local args=$7
+	local image=$1
+	local bindir=$2
+	local bin=$3
+	local target=$4
+	local variant=$5
+	local mode=$6
+	local timeout=$7
+	local args=$8
 	local execfile=""
 
 	case $variant in
@@ -55,19 +81,19 @@ function run
 	then
 		$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner \
 			--gdb                            \
-			--multibinary=$multibin          \
+			--multibinary=$image             \
 			$execfile                        \
 			-- $args
 	else
 		$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner \
-			--multibinary=$multibin          \
+			--multibinary=$image             \
 			$execfile                        \
 			-- $args
 	fi
 }
 
 #
-# Runs a binary file in a single compute cluster in the simulator.
+# Runs a binary in the platform (simulator).
 #
 function run_sim
 {
