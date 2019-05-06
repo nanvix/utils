@@ -34,17 +34,24 @@ DISTRO=`cat /etc/os-release | grep "^ID="`
 case "$DISTRO" in
     *"ubuntu"*|*"debian"*)
 		apt-get update
-        apt-get install -y  \
-			bison           \
-			dh-autoreconf   \
-			flex            \
-			g++             \
-			libglib2.0-dev  \
-			libncurses5-dev \
-			libpixman-1-dev \
-			libsdl2-dev     \
-			libtool         \
-			texinfo         \
+        apt-get install -y   \
+			automake         \
+			build-essential  \
+			bison            \
+			dh-autoreconf    \
+			doxygen          \
+			flex             \
+			g++              \
+			graphviz         \
+			libglib2.0-dev   \
+			libncurses5-dev  \
+			libncursesw5-dev \
+			libpixman-1-dev  \
+			libsdl2-dev      \
+			libtool          \
+			texinfo          \
+			unzip            \
+			wget             \
 			zlib1g-dev
         ;;
     *"arch"*)
