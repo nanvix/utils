@@ -57,6 +57,16 @@ function check_args
 
 #==============================================================================
 
+# Verbose mode.
+if [[ ! -z $VERBOSE ]];
+then
+	echo "==============================================================================="
+	echo "SCRIPT_DIR  = $SCRIPT_DIR"
+	echo "SCRIPT_NAME = $SCRIPT_NAME"
+	echo "TARGET      = $TARGET"
+	echo "==============================================================================="
+fi
+
 # Source Target Configuration
 case "$TARGET" in
 	"qemu-x86"      | \
