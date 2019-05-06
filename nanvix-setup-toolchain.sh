@@ -71,5 +71,4 @@ case "$TARGET" in
 		;;
 esac
 
-function setup_toolchain
-
+setup_toolchain
