@@ -36,11 +36,9 @@ case "$DISTRO" in
 		apt-get update
         apt-get install -y  \
 			bison           \
-			ddd             \
 			dh-autoreconf   \
 			flex            \
 			g++             \
-			genisoimage     \
 			libglib2.0-dev  \
 			libncurses5-dev \
 			libpixman-1-dev \
