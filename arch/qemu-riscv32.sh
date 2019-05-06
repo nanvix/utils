@@ -1,3 +1,4 @@
+#
 # MIT License
 #
 # Copyright(c) 2011-2019 The Maintainers of Nanvix
@@ -19,6 +20,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
 
 #
 # Sets up development tools.
@@ -27,7 +29,7 @@ function setup_toolchain
 {
 	# Required variables.
 	local CURDIR=`pwd`
-	local WORKDIR=$CURDIR/tools/toolchain/riscv32
+	local WORKDIR=$CURDIR/toolchain/riscv32
 	local PREFIX=$WORKDIR
 	local TARGET=riscv32-elf
 	local COMMIT=1fed470a3a0b59405887c8e0cc2e253f1f7b6643
