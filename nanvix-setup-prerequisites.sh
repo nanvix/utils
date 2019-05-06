@@ -33,6 +33,7 @@ DISTRO=`cat /etc/os-release | grep "^ID="`
 # Parse distribution.
 case "$DISTRO" in
     *"ubuntu"*|*"debian"*)
+		apt-get update
         apt-get install -y  \
 			bison           \
 			ddd             \
