@@ -38,10 +38,11 @@ function setup_toolchain
 #
 function build
 {
-	local bindir=$1
-	local iobin=$2
-	local nodebin=$3
-	local image=$4
+	local image=$1
+	local bindir=$2
+	local binary=$3
+	local iobin=$binary-k1bio
+	local nodebin=$binary-k1bdp
 
 	$K1_TOOLCHAIN_DIR/bin/k1-create-multibinary \
 		--boot $bindir/$iobin                   \
