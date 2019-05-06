@@ -46,7 +46,7 @@ export OUTFILE="nanvix-run.output"
 #
 function usage
 {
-	echo "$SCRIPT_NAME <image> <binary> <target> <target variant> [mode]"
+	echo "$SCRIPT_NAME <image> <bindir> <binary> <target> <target variant> [mode]"
 	exit 1
 }
 
@@ -81,10 +81,10 @@ function check_args
 	fi
 
 	case $VARIANT in
-		"--all" | "--iocluster" | "--ccluster")
+		"all" | "iocluster" | "ccluster")
 			;;
 		*)
-			echo "$SCRIPT_NAME: bad target variant [--all | --iocluster | --ccluster]"
+			echo "$SCRIPT_NAME: bad target variant [all | iocluster | ccluster]"
 			exit 1
 			;;
 	esac

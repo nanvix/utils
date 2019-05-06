@@ -67,14 +67,14 @@ function run
 
 	case $variant in
 		"all")
-			execfile="--exec-file=IODDR0:$bin-k1bio   \
-				--exec-file=Cluster0:$bin-k1bdp"
+			execfile="--exec-file=IODDR0:$bindir/$bin-k1bio \
+				--exec-file=Cluster0:$bindir/$bin-k1bdp"
 			;;
 		"iocluster")
-			execfile="--exec-file=IODDR0:$bin-k1bio"
+			execfile="--exec-file=IODDR0:$bindir/$bin-k1bio"
 			;;
 		"ccluster")
-			execfile="--exec-file=Cluster0:$bin-k1bdp"
+			execfile="--exec-file=Cluster0:$bindir/$bin-k1bdp"
 			;;
 	esac
 
