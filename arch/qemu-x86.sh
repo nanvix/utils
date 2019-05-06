@@ -25,7 +25,7 @@
 #
 # Sets up development tools.
 #
-function setup_toochain
+function setup_toolchain
 {
 	local CURDIR=`pwd`
 	local WORKDIR=$SCRIPT_DIR/toolchain/i486
