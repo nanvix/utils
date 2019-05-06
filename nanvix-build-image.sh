@@ -109,4 +109,4 @@ case "$TARGET" in
 esac
 
 # Build multi-binaries.
-build $BINDIR $BINARY $IMAGE
+build $IMAGE $BINDIR $BINARY
