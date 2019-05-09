@@ -55,8 +55,9 @@ function run
 	then
 		if [ $mode == "--debug" ];
 		then
-			timeout --foreground $timeout             \
-			osd-target-run                            \
+
+			timeout --foreground $timeout           \
+			osd-target-run                          \
 				-e $binary                            \
 				-b uart                               \
 				-o device=/dev/ttyUSB1,speed=12000000 \
@@ -64,7 +65,7 @@ function run
 				--coretrace                           \
 				-vvv
 		else
-			osd-target-run                            \
+			osd-target-run                          \
 				-e $binary                            \
 				-b uart                               \
 				-o device=/dev/ttyUSB1,speed=12000000 \
@@ -74,7 +75,7 @@ function run
 	else
 		if [ $mode == "--debug" ];
 		then
-			osd-target-run                            \
+			osd-target-run                          \
 				-e $binary                            \
 				-b uart                               \
 				-o device=/dev/ttyUSB1,speed=12000000 \
@@ -82,7 +83,7 @@ function run
 				--coretrace                           \
 				-vvv
 		else
-			osd-target-run                            \
+			osd-target-run                          \
 				-e $binary                            \
 				-b uart                               \
 				-o device=/dev/ttyUSB1,speed=12000000 \
