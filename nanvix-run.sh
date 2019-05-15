@@ -121,6 +121,7 @@ case "$TARGET" in
 	"qemu-x86"      | \
 	"qemu-openrisc" | \
 	"qemu-riscv32"  | \
+	"unix64"        | \
 	"mppa256"       | \
 	"optimsoc")
 		source $SCRIPT_DIR/arch/$TARGET.sh
