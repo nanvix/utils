@@ -103,8 +103,6 @@ function run
 	# Target configuration.
 	local MEMSIZE=128M # Memory Size
 	local NCORES=2     # Number of Cores
-
-	echo "timeout=$timeout"
 		
 	if [ $mode == "--debug" ];
 	then
