@@ -47,7 +47,7 @@ function build
 	$K1_TOOLCHAIN_DIR/bin/k1-create-multibinary \
 		--boot $bindir/$iobin                   \
 		--clusters $bindir/$nodebin             \
-		-T $image
+		-T $image -f
 }
 
 #
