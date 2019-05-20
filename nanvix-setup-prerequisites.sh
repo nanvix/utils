@@ -45,6 +45,7 @@ case "$DISTRO" in
 			graphviz         \
 			libglib2.0-dev   \
 			libncurses5-dev  \
+			libncursesw5     \
 			libncursesw5-dev \
 			libpixman-1-dev  \
 			libsdl2-dev      \
