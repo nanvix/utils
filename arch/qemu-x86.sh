@@ -107,13 +107,13 @@ function check_network
 	local foundtap=`grep "nanvix-tap" /proc/net/dev`
 	local foundbridge=`grep "nanvix-bridge" /proc/net/dev`
 
-	if  [ -n "$foundtap" and -n "$foundbridge" ]; 
+	if  [ -n "$foundtap" -a -n "$foundbridge" ] 
 	then
 		echo "Network TAP interface and bridge are setup"
-		exit 1
 	else
 		echo "You should setup a TAP interface and a bridge :
-	sudo ./nanvix-setup-network.sh on"
+	sudo bash ./nanvix-setup-network.sh on"
+		exit 1
 	fi
 }
 
@@ -144,7 +144,7 @@ function run
 			-kernel $bindir/$binary \
 			-m $MEMSIZE             \
 			-mem-prealloc			\
-			-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \ 
+			-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \
 			-device rtl8139,netdev=t0,id=nic0,mac=$mac
 	else
 		qemu-system-i386 -s         \
