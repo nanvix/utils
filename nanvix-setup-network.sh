@@ -81,6 +81,10 @@ function check_args
 
 #==============================================================================
 
+#
+# Setup a TAP interface and a bridge, link them together and 
+# give the TAP interface an IP adress
+#
 function on
 {
     sudo ip link add $BRIDGE_INTERFACE_NAME type bridge
@@ -91,8 +95,13 @@ function on
     sudo ip addr add dev $TAP_INTERFACE_NAME $TAP_IP_ADRESS
 
     echo "Network interfaces successfully setup"
+    echo "Remember that you can remove the interfaces :
+        sudo bash $SCRIPT_NAME off"
 }
 
+#
+# Remove the previously created interfaces
+#
 function off
 {
     sudo ip link delete $TAP_INTERFACE_NAME

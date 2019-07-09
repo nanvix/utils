@@ -112,8 +112,8 @@ function check_network
 		echo "Network TAP interface and bridge are setup"
 		exit 1
 	else
-		echo "You should setup a TAP interface and a bridge : \n
-			\t sudo ./nanvix-setup-network.sh on"
+		echo "You should setup a TAP interface and a bridge :
+	sudo ./nanvix-setup-network.sh on"
 	fi
 }
 
