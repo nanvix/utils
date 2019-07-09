@@ -99,6 +99,25 @@ function build
 }
 
 #
+# Very simple way of testing if the network interfaces exists. 
+# Testing if network interfaces are UP should be added
+#
+function check_network
+{
+	local foundtap=`grep "nanvix-tap" /proc/net/dev`
+	local foundbridge=`grep "nanvix-bridge" /proc/net/dev`
+
+	if  [ -n "$foundtap" and -n "$foundbridge" ]; 
+	then
+		echo "Network TAP interface and bridge are setup"
+		exit 1
+	else
+		echo "You should setup a TAP interface and a bridge : \n
+			\t sudo ./nanvix-setup-network.sh on"
+	fi
+}
+
+#
 # Runs a binary in the platform (simulator).
 #
 function run
@@ -111,6 +130,10 @@ function run
 	local mode=$6
 	local timeout=$7
 
+	local mac=52:55:00:d1:55:01
+
+	check_network
+
 	# Target configuration.
 	local MEMSIZE=128M # Memory Size
 		
@@ -120,12 +143,16 @@ function run
 			--display curses        \
 			-kernel $bindir/$binary \
 			-m $MEMSIZE             \
-			-mem-prealloc
+			-mem-prealloc			\
+			-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \ 
+			-device rtl8139,netdev=t0,id=nic0,mac=$mac
 	else
 		qemu-system-i386 -s         \
 			--display curses        \
 			-kernel $bindir/$binary \
 			-m $MEMSIZE             \
-			-mem-prealloc
+			-mem-prealloc			\
+			-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \
+			-device rtl8139,netdev=t0,id=nic0,mac=$mac
 	fi
 }
