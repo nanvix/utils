@@ -126,7 +126,7 @@ function run
 			-mem-prealloc           \
 			-smp $NCORES
 	else
-		if [ ! -z $timeout ];
+		if [ -n $timeout ];
 		then
 			timeout --foreground  $timeout \
 			qemu-system-riscv32 -s         \
@@ -137,7 +137,15 @@ function run
 				-m $MEMSIZE                \
 				-mem-prealloc              \
 				-smp $NCORES               \
-			| tee $OUTFILE
+			|& tee $OUTFILE
+			line=$(cat $OUTFILE | tail -1)
+			if [ "$line" = "[hal] powering off..." ];
+			then
+				echo "Succeed !"
+			else
+				echo "Failed !"
+				return -1
+			fi
 		else
 			qemu-system-riscv32 -s      \
 				-machine virt           \
