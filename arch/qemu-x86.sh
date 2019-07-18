@@ -156,7 +156,7 @@ function run
 				-m $MEMSIZE             \
 				-mem-prealloc			\
 				-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \
-				-device rtl8139,netdev=t0,id=nic0,mac=$mac
+				-device rtl8139,netdev=t0,id=nic0,mac=$mac \
 			|& tee $OUTFILE
 			line=$(cat $OUTFILE | tail -1)
 			if [ "$line" = "[hal] powering off..." ];
