@@ -55,7 +55,7 @@ function run
 
 	# Target configuration.
 	local MEMSIZE=128M # Memory Size
-	local NCORES=5     # Number of Cores
+	local NCORES=4     # Number of Cores
 		
 	if [ $mode == "--debug" ];
 	then
@@ -63,9 +63,18 @@ function run
 	else
 		if [ ! -z $timeout ];
 		then
+		    echo "oui"$timeout
 			timeout --foreground  $timeout \
 				$bindir/$binary            \
-			| tee $OUTFILE
+			|& tee $OUTFILE
+			line=$(cat $OUTFILE | tail -1)
+			if [ "$line" = "[hal] powering off..." ];
+			then
+				echo "Succeed !"
+			else
+				echo "Failed !"
+				return -1
+			fi
 		else
 			$bindir/$binary
 		fi

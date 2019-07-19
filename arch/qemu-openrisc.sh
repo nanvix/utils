@@ -124,7 +124,15 @@ function run
 				-m $MEMSIZE               \
 				-mem-prealloc             \
 				-smp $NCORES              \
-			| tee $OUTFILE
+			|& tee $OUTFILE
+			line=$(cat $OUTFILE | tail -2 | head -1)
+			if [ "$line" = "[hal] powering off..." ];
+			then
+				echo "Succeed !"
+			else
+				echo "Failed !"
+				return -1
+			fi
 		else
 			qemu-system-or1k -s         \
 				-kernel $bindir/$binary \
