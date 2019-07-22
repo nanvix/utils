@@ -123,7 +123,8 @@ function run
 			-display none           \
 			-m $MEMSIZE             \
 			-mem-prealloc           \
-			-smp $NCORES
+			-smp $NCORES            \
+			-net nic -net tap,ifname=nanvix-tap,script=no,downscript=no
 	else
 		if [ ! -z $timeout ];
 		then
@@ -135,6 +136,7 @@ function run
 				-m $MEMSIZE               \
 				-mem-prealloc             \
 				-smp $NCORES              \
+				-net nic -net tap,ifname=nanvix-tap,script=no,downscript=no \
 			|& tee $OUTFILE
 			line=$(cat $OUTFILE | tail -2 | head -1)
 			if [ "$line" = "[hal] powering off..." ] || [ "$line" = "[hal] halting..." ];
@@ -151,7 +153,8 @@ function run
 				-display none           \
 				-m $MEMSIZE             \
 				-mem-prealloc           \
-				-smp $NCORES
+				-smp $NCORES            \
+				-net nic -net tap,ifname=nanvix-tap,script=no,downscript=no
 		fi
 	fi
 }
