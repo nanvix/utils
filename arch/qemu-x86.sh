@@ -147,12 +147,33 @@ function run
 			-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \
 			-device rtl8139,netdev=t0,id=nic0,mac=$mac
 	else
-		qemu-system-i386 -s         \
-			--display curses        \
-			-kernel $bindir/$binary \
-			-m $MEMSIZE             \
-			-mem-prealloc			\
-			-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \
-			-device rtl8139,netdev=t0,id=nic0,mac=$mac
+		if [ ! -z $timeout ];
+		then
+			timeout --foreground  $timeout \
+			qemu-system-i386 -s         \
+				--display curses        \
+				-kernel $bindir/$binary \
+				-m $MEMSIZE             \
+				-mem-prealloc			\
+				-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \
+				-device rtl8139,netdev=t0,id=nic0,mac=$mac \
+			|& tee $OUTFILE
+			line=$(cat $OUTFILE | tail -1)
+			if [ "$line" = "[hal] powering off..." ];
+			then
+				echo "Succeed !"
+			else
+				echo "Failed !"
+				return -1
+			fi
+		else
+			qemu-system-i386 -s         \
+				--display curses        \
+				-kernel $bindir/$binary \
+				-m $MEMSIZE             \
+				-mem-prealloc			\
+				-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \
+				-device rtl8139,netdev=t0,id=nic0,mac=$mac
+		fi
 	fi
 }
