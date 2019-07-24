@@ -23,12 +23,11 @@
 
 #
 # NOTES:
-#   - This script setup (and reset) a Network TAP interface and a bridge for
-#  QEMU networking to work properly on qemu-x86.
 #   - You should run this script with superuser privileges.
+#
 
 # Script Arguments
-COMMAND=$1    # Command, either on or off
+COMMAND=$1 # Command, either on or off
 
 # Global Variables
 export SCRIPT_NAME=$0
@@ -93,21 +92,21 @@ function check_args
 function on
 {
 	# We don't have tunctl.
-	if  [ $(sudo which tunctl > /dev/null) ];
+	if  [ $(which tunctl > /dev/null) ];
 	then
 		echo "tunctl utility is missing"
 		exit 1
 	fi
 
 	# We don't have ip.
-	if [ $(sudo which ip > /dev/null) ];
+	if [ $(which ip > /dev/null) ];
 	then
 		echo "ip utility is missing"
 		exit 1
 	fi
 
 	# We don't have ip.
-	if [ $(sudo which ifconfig > /dev/null) ];
+	if [ $(which ifconfig > /dev/null) ];
 	then
 		echo "ifconfig utility is missing"
 		exit 1
@@ -116,26 +115,26 @@ function on
 	# Create device node.
 	if [ ! -e /dev/net/$TAP_NAME ];
 	then
-		sudo mknod /dev/net/$TAP_NAME c 10 200
-		sudo chown $(whoami):$(whoami) /dev/net/$TAP_NAME
+		mknod /dev/net/$TAP_NAME c 10 200
+		chown $(whoami):$(whoami) /dev/net/$TAP_NAME
 	fi
 
 	# Create tap interface.
 	if [ ! -e /sys/class/net/$TAP_NAME ];
 	then
-		sudo tunctl -t $TAP_NAME -u $(whoami) > /dev/null
-		sudo chown $(whoami):$(whoami) /dev/net/tun
+		tunctl -t $TAP_NAME -u $(whoami) > /dev/null
+		chown $(whoami):$(whoami) /dev/net/tun
 	fi
 
 	# Setup tap interface.
-	sudo ip addr add $IP_ADDR/$IP_NETMASK_CIDR dev $TAP_NAME
-	sudo ifconfig $TAP_NAME $IP_ADDR netmask $IP_NETMASK up
-	sudo ifconfig $TAP_NAME hw ether 52:55:00:d1:55:01
-	sudo ip link set dev $TAP_NAME up
+	ip addr add $IP_ADDR/$IP_NETMASK_CIDR dev $TAP_NAME
+	ifconfig $TAP_NAME $IP_ADDR netmask $IP_NETMASK up
+	ifconfig $TAP_NAME hw ether 52:55:00:d1:55:01
+	ip link set dev $TAP_NAME up
 
 	echo "Network interface successfully setup!"
 	echo "Remember that you can remove the interfaces:"
-	echo "    sudo bash $SCRIPT_NAME off"
+	echo "    bash $SCRIPT_NAME off"
 }
 
 #
@@ -143,11 +142,11 @@ function on
 #
 function off
 {
-	sudo ip addr delete $IP_ADDR/$IP_NETMASK_CIDR dev $TAP_NAME
-	sudo ifconfig $TAP_NAME down
-	sudo ip link delete dev $TAP_NAME
-	sudo tunctl -d $TAP_NAME > /dev/null
-	sudo unlink /dev/net/$TAP_NAME
+	ip addr delete $IP_ADDR/$IP_NETMASK_CIDR dev $TAP_NAME
+	ifconfig $TAP_NAME down
+	ip link delete dev $TAP_NAME
+	tunctl -d $TAP_NAME > /dev/null
+	unlink /dev/net/$TAP_NAME
 
     echo "Network interface successfully removed!"
 }
