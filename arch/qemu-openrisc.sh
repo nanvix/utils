@@ -32,7 +32,7 @@ function setup_toolchain
 	local WORKDIR=$CURDIR/toolchain/or1k
 	local PREFIX=$WORKDIR
 	local TARGET=or1k-elf
-	local COMMIT=f3a3fe2aa94a5e9098285bb0d2a312d6d5f74ee9
+	local COMMIT=ccfd3f43e29a0b02249ffb3a256330a3717cca18
 
 	# Retrieve the number of processor cores
 	local NCORES=`grep -c ^processor /proc/cpuinfo`
