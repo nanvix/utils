@@ -32,7 +32,7 @@ function setup_toolchain
 	local WORKDIR=$CURDIR/toolchain/riscv32
 	local PREFIX=$WORKDIR
 	local TARGET=riscv32-elf
-	local COMMIT=1fed470a3a0b59405887c8e0cc2e253f1f7b6643
+	local COMMIT=ad6494dbda411e055023329e25de7e709d689608
 	
 	# Retrieve the number of processor cores
 	local NCORES=`grep -c ^processor /proc/cpuinfo`
