@@ -99,7 +99,7 @@ function build
 }
 
 #
-# Very simple way of testing if the network interfaces exists. 
+# Very simple way of testing if the network interfaces exists.
 # Testing if network interfaces are UP should be added
 #
 function check_network
@@ -137,7 +137,7 @@ function run
 
 	# Target configuration.
 	local MEMSIZE=128M # Memory Size
-		
+
 	if [ $mode == "--debug" ];
 	then
 		qemu-system-i386 -s -S      \
