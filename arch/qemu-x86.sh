@@ -31,7 +31,7 @@ function setup_toolchain
 	local WORKDIR=$SCRIPT_DIR/toolchain/i486
 	local PREFIX=$WORKDIR
 	local TARGET=i486-elf
-	local COMMIT=43a94d5511bc158033075f4efa63ba109fd64bc9
+	local COMMIT=8dc3bfa2be9b7165188cfe0718ad0571a11cc649
 
 	# Retrieve the number of processor cores
 	local NCORES=`grep -c ^processor /proc/cpuinfo`
