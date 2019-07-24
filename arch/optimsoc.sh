@@ -50,7 +50,7 @@ function run
 	local timeout=$7
 
 	echo "timeout=$timeout"
-		
+
 	if [ ! -z $timeout ];
 	then
 		if [ $mode == "--debug" ];

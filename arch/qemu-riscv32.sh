@@ -33,32 +33,32 @@ function setup_toolchain
 	local PREFIX=$WORKDIR
 	local TARGET=riscv32-elf
 	local COMMIT=ad6494dbda411e055023329e25de7e709d689608
-	
+
 	# Retrieve the number of processor cores
 	local NCORES=`grep -c ^processor /proc/cpuinfo`
-	
+
 	mkdir -p $WORKDIR
 	cd $WORKDIR
-	
+
 	# Get toolchain.
 	wget "https://github.com/nanvix/toolchain/archive/$COMMIT.zip"
 	unzip $COMMIT.zip
 	mv toolchain-$COMMIT/* .
-	
+
 	# Cleanup.
 	rm -rf toolchain-$COMMIT
 	rm -rf $COMMIT.zip
-	
+
 	# Build binutils.
 	cd binutils*/
 	./configure --target=$TARGET --prefix=$PREFIX --disable-nls
 	make -j $NCORES all
 	make install
-	
+
 	# Cleanup.
 	cd $WORKDIR
 	rm -rf binutils*
-	
+
 	# Build GCC.
 	cd gcc*/
 	./contrib/download_prerequisites
@@ -69,22 +69,22 @@ function setup_toolchain
 	make -j $NCORES all-target-libgcc
 	make install-gcc
 	make install-target-libgcc
-	
+
 	# Cleanup.
 	cd $WORKDIR
 	rm -rf gcc*
-	
+
 	# Build GDB.
 	cd $WORKDIR
 	cd gdb*/
 	./configure --target=$TARGET --prefix=$PREFIX --with-auto-load-safe-path=/ --with-guile=no
 	make -j $NCORES
 	make install
-	
+
 	# Cleanup.
 	cd $WORKDIR
 	rm -rf gdb*
-	
+
 	# Back to the current folder
 	cd $CURDIR
 }
@@ -114,7 +114,7 @@ function run
 	# Target configuration.
 	local MEMSIZE=128M # Memory Size
 	local NCORES=5     # Number of Cores
-		
+
 	if [ $mode == "--debug" ];
 	then
 		qemu-system-riscv32 -s -S   \

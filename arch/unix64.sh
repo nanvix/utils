@@ -56,7 +56,7 @@ function run
 	# Target configuration.
 	local MEMSIZE=128M # Memory Size
 	local NCORES=4     # Number of Cores
-		
+
 	if [ $mode == "--debug" ];
 	then
 		gdb $bindir/$binary

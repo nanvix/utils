@@ -33,14 +33,17 @@ COMMAND=$1    # Command, either on or off
 # Global Variables
 export SCRIPT_NAME=$0
 
-# Options
-# be careful changing those values, they are also hard coded in the qemu-x86.sh script
-# but I don't know the proper way to make them dependant.
+#
+# Network Options
+#
+# Careful when changing these valies. They are
+# hard coded in the in target-specific scripts.
+#
 TAP_NAME=nanvix-tap
-BRIDGE_INTERFACE_NAME=nanvix-bridge
 IP_ADDR=192.168.66.66
 IP_NETMASK_CIDR=24
 IP_NETMASK=255.255.255.0
+
 #==============================================================================
 # usage()
 #==============================================================================
