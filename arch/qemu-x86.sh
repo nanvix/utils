@@ -104,15 +104,13 @@ function build
 #
 function check_network
 {
-	local foundtap=`grep "nanvix-tap" /proc/net/dev`
-	local foundbridge=`grep "nanvix-bridge" /proc/net/dev`
 
-	if  [ -n "$foundtap" -a -n "$foundbridge" ] 
+	if [ -e /sys/class/net/$TAP_NAME ];
 	then
-		echo "Network TAP interface and bridge are setup"
+		echo "Network TAP interface is setup"
 	else
-		echo "You should setup a TAP interface and a bridge :
-	sudo bash ./nanvix-setup-network.sh on"
+		echo "You should setup a TAP interface:"
+		echo "    sudo bash ./utils/nanvix-setup-network.sh on"
 		exit 1
 	fi
 }
@@ -130,7 +128,10 @@ function run
 	local mode=$6
 	local timeout=$7
 
+	# be careful changing those values, they are also hard coded in the qemu-x86.sh script
+	# but I don't know the proper way to make them dependant.
 	local mac=52:55:00:d1:55:01
+	local TAP_NAME=nanvix-tap
 
 	check_network
 
