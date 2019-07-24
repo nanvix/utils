@@ -38,11 +38,13 @@ case "$DISTRO" in
 			automake         \
 			build-essential  \
 			bison            \
+			bridge-utils     \
 			dh-autoreconf    \
 			doxygen          \
 			flex             \
 			g++              \
 			graphviz         \
+			iproute2         \
 			libglib2.0-dev   \
 			libncurses5-dev  \
 			libncursesw5     \
@@ -50,7 +52,10 @@ case "$DISTRO" in
 			libpixman-1-dev  \
 			libsdl2-dev      \
 			libtool          \
+			net-tools        \
+			python           \
 			texinfo          \
+			uml-utilities    \
 			unzip            \
 			wget             \
 			zlib1g-dev
