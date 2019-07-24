@@ -32,33 +32,33 @@ function setup_toolchain
 	local WORKDIR=$CURDIR/toolchain/or1k
 	local PREFIX=$WORKDIR
 	local TARGET=or1k-elf
-	local COMMIT=5b661a015490505201e21284914a169bcdad877e
-	
+	local COMMIT=f3a3fe2aa94a5e9098285bb0d2a312d6d5f74ee9
+
 	# Retrieve the number of processor cores
 	local NCORES=`grep -c ^processor /proc/cpuinfo`
-	
+
 	mkdir -p $WORKDIR
 	cd $WORKDIR
-	
+
 	# Get toolchain.
 	wget "https://github.com/nanvix/toolchain/archive/$COMMIT.zip"
 	unzip $COMMIT.zip
 	mv toolchain-$COMMIT/* .
-	
+
 	# Cleanup.
 	rm -rf toolchain-$COMMIT
 	rm -rf $COMMIT.zip
-	
-	# Build binutils and GDB.
+
+	# Build binutils.
 	cd binutils*/
-	./configure --target=$TARGET --prefix=$PREFIX --disable-nls --disable-sim --with-auto-load-safe-path=/ --enable-tui --with-guile=no
+	./configure --target=$TARGET --prefix=$PREFIX --disable-nls --disable-sim
 	make -j $NCORES all
 	make install
-	
+
 	# Cleanup.
 	cd $WORKDIR
 	rm -rf binutils*
-	
+
 	# Build GCC.
 	cd gcc*/
 	./contrib/download_prerequisites
@@ -69,11 +69,22 @@ function setup_toolchain
 	make -j $NCORES all-target-libgcc
 	make install-gcc
 	make install-target-libgcc
-	
+
 	# Cleanup.
 	cd $WORKDIR
 	rm -rf gcc*
-	
+
+	# Build GDB.
+	cd $WORKDIR
+	cd gdb*/
+	./configure --target=$TARGET --prefix=$PREFIX --with-auto-load-safe-path=/ --with-guile=no
+	make -j $NCORES
+	make install
+
+	# Cleanup.
+	cd $WORKDIR
+	rm -rf gdb*
+
 	# Back to the current folder
 	cd $CURDIR
 }
@@ -103,7 +114,7 @@ function run
 	# Target configuration.
 	local MEMSIZE=128M # Memory Size
 	local NCORES=2     # Number of Cores
-		
+
 	if [ $mode == "--debug" ];
 	then
 		qemu-system-or1k -s -S      \
