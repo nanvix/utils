@@ -116,14 +116,13 @@ function on
 	if [ ! -e /dev/net/$TAP_NAME ];
 	then
 		mknod /dev/net/$TAP_NAME c 10 200
-		chown $(whoami):$(whoami) /dev/net/$TAP_NAME
+		chown $SUDO_USER:$SUDO_USER /dev/net/$TAP_NAME
 	fi
 
 	# Create tap interface.
 	if [ ! -e /sys/class/net/$TAP_NAME ];
 	then
-		tunctl -t $TAP_NAME -u $(whoami) > /dev/null
-		chown $(whoami):$(whoami) /dev/net/tun
+		tunctl -t $TAP_NAME -u $SUDO_USER > /dev/null
 	fi
 
 	# Setup tap interface.
