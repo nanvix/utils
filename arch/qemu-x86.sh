@@ -159,8 +159,8 @@ function run
 				-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \
 				-device rtl8139,netdev=t0,id=nic0,mac=$mac \
 			|& tee $OUTFILE
-			line=$(cat $OUTFILE | tail -1)
-			if [ "$line" = "[hal] powering off..." ];
+			line=$(cat $OUTFILE | tail -2 | head -1)
+			if [ "$line" = "[hal] powering off..." ] || [ "$line" = "[hal] halting..." ];
 			then
 				echo "Succeed !"
 			else
