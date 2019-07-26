@@ -137,7 +137,7 @@ function run
 				-smp $NCORES              \
 			|& tee $OUTFILE
 			line=$(cat $OUTFILE | tail -2 | head -1)
-			if [ "$line" = "[hal] powering off..." ];
+			if [ "$line" = "[hal] powering off..." ] || [ "$line" = "[hal] halting..." ];
 			then
 				echo "Succeed !"
 			else
