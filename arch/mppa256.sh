@@ -99,7 +99,6 @@ function run
 			then
 				echo "Succeed !"
 			else
-				echo "==== $line"
 				echo "Failed !"
 				return -1
 			fi
