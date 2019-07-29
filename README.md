@@ -10,6 +10,8 @@ following tools are hereby shipped:
 
 - `nanvix-build-image.sh`: builds system images
 - `nanvix-run.sh`: runs system images in a target
+- `nanvix-setup-network`: sets up network interface for qemu guest
+- `nanvix-setup-perf`: sets up performance interface for unix64 target
 - `nanvix-setup-prerequisites.sh`: installs prerequisites for building the toolchains
 - `nanvix-setup-qemu.sh`: builds the simulator of  a target
 - `nanvix-setup-toolchain.sh`: builds the toolchain of a target
