@@ -138,8 +138,8 @@ function run
 				-mem-prealloc              \
 				-smp $NCORES               \
 			|& tee $OUTFILE
-			line=$(cat $OUTFILE | tail -1)
-			if [ "$line" = "[hal] powering off..." ];
+			line=$(cat $OUTFILE | tail -2 | head -1)
+			if [ "$line" = "[hal] powering off..." ] || [ "$line" = "[hal] halting..." ];
 			then
 				echo "Succeed !"
 			else

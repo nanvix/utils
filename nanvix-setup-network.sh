@@ -27,7 +27,19 @@
 #
 
 # Script Arguments
-COMMAND=$1 # Command, either on or off
+COMMAND=$1  # Command, either on or off
+IS_ROOT=$2  # Running as root?
+
+#
+# Get name of target user.
+#
+USERNAME=$SUDO_USER
+if [ ! -z $IS_ROOT ] && [ $IS_ROOT == "--root" ];
+then
+	USERNAME="root"
+fi
+
+
 
 # Global Variables
 export SCRIPT_NAME=$0
@@ -52,8 +64,7 @@ IP_NETMASK=255.255.255.0
 #
 function usage
 {
-	echo "$SCRIPT_NAME <command>
-        command: [on | off]"
+	echo "$SCRIPT_NAME <on | off> [--root]"
 	exit 1
 }
 
@@ -77,8 +88,8 @@ function check_args
 		"on" | "off")
 			;;
 		*)
-			echo "$SCRIPT_NAME: bad command [on | off]"
-			exit 1
+			echo "$SCRIPT_NAME: bad command"
+			usage
 			;;
 	esac
 }
@@ -116,14 +127,13 @@ function on
 	if [ ! -e /dev/net/$TAP_NAME ];
 	then
 		mknod /dev/net/$TAP_NAME c 10 200
-		chown $(whoami):$(whoami) /dev/net/$TAP_NAME
+		chown $USERNAME:$USERNAME /dev/net/$TAP_NAME
 	fi
 
 	# Create tap interface.
 	if [ ! -e /sys/class/net/$TAP_NAME ];
 	then
-		tunctl -t $TAP_NAME -u $(whoami) > /dev/null
-		chown $(whoami):$(whoami) /dev/net/tun
+		tunctl -t $TAP_NAME -u $USERNAME > /dev/null
 	fi
 
 	# Setup tap interface.

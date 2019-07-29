@@ -86,10 +86,28 @@ function run
 			$execfile                        \
 			-- $args
 	else
-		$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner \
-			--multibinary=$image             \
-			$execfile                        \
-			-- $args
+		if [ ! -z $timeout ];
+		then
+			timeout --foreground $timeout        \
+			$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner \
+				--multibinary=$image             \
+				$execfile                        \
+				-- $args                         \
+			|& tee $OUTFILE
+			line=$(cat $OUTFILE | tail -1 )
+			if [[ $line == *"[hal] powering off..." ]];
+			then
+				echo "Succeed !"
+			else
+				echo "Failed !"
+				return -1
+			fi
+		else
+			$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner \
+				--multibinary=$image             \
+				$execfile                        \
+				-- $args
+		fi
 	fi
 }
 

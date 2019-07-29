@@ -28,7 +28,7 @@ export WORKDIR=$CURDIR/toolchain/qemu
 export PREFIX=$WORKDIR
 
 # QEMU Version
-export QEMU_VERSION=3.1.0
+export QEMU_VERSION=4.0.0
 
 # Number of Cores
 NCORES=`grep -c "^processor" /proc/cpuinfo`
