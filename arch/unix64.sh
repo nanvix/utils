@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# Copyright(c) 2018 Pedro Henrique Penna <pedrohenriquepenna@gmail.com>
+# Copyright(c) 2011-2019 The Maintainers of Nanvix
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,6 @@
 # SOFTWARE.
 #
 
-export K1_TOOLCHAIN_DIR="/usr/local/k1tools"
-
 #
 # Sets up development tools.
 #
@@ -38,72 +36,47 @@ function setup_toolchain
 #
 function build
 {
-	local image=$1
-	local bindir=$2
-	local binary=$3
-	local iobin=$binary-k1bio
-	local nodebin=$binary-k1bdp
-
-	$K1_TOOLCHAIN_DIR/bin/k1-create-multibinary \
-		--boot $bindir/$iobin                   \
-		--clusters $bindir/$nodebin             \
-		-T $image -f
-}
-
-#
-# Runs a binary in the platform.
-#
-function run
-{
-	local image=$1
-	local bindir=$2
-	local bin=$3
-	local target=$4
-	local variant=$5
-	local mode=$6
-	local timeout=$7
-	local args=$8
-	local execfile=""
-
-	case $variant in
-		"all")
-			execfile="--exec-file=IODDR0:$bindir/$bin-k1bio \
-				--exec-file=Cluster0:$bindir/$bin-k1bdp"
-			;;
-		"iocluster")
-			execfile="--exec-file=IODDR0:$bindir/$bin-k1bio"
-			;;
-		"ccluster")
-			execfile="--exec-file=Cluster0:$bindir/$bin-k1bdp"
-			;;
-	esac
-
-	if [ $mode == "--debug" ];
-	then
-		$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner \
-			--gdb                            \
-			--multibinary=$image             \
-			$execfile                        \
-			-- $args
-	else
-		$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner \
-			--multibinary=$image             \
-			$execfile                        \
-			-- $args
-	fi
+	# Nothing to do.
+	echo ""
 }
 
 #
 # Runs a binary in the platform (simulator).
 #
-function run_sim
+function run
 {
-	local bin=$1
-	local args=$2
+	local image=$1
+	local bindir=$2
+	local binary=$3
+	local target=$4
+	local variant=$5
+	local mode=$6
+	local timeout=$7
 
-	$K1_TOOLCHAIN_DIR/bin/k1-cluster \
-		--mboard=$BOARD           \
-		--march=$ARCH             \
-		--bootcluster=node0       \
-		-- $bin $args
+	# Target configuration.
+	local MEMSIZE=128M # Memory Size
+	local NCORES=4     # Number of Cores
+
+	if [ $mode == "--debug" ];
+	then
+		gdb $bindir/$binary
+	else
+		if [ ! -z $timeout ];
+		then
+		    echo "oui"$timeout
+			timeout --foreground  $timeout \
+				$bindir/$binary            \
+			|& tee $OUTFILE
+			line=$(cat $OUTFILE | tail -1)
+			if [ "$line" = "[hal] powering off..." ];
+			then
+				echo "Succeed !"
+			else
+				echo "Failed !"
+				return -1
+			fi
+		else
+			$bindir/$binary
+		fi
+	fi
 }

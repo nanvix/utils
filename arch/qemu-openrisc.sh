@@ -1,3 +1,4 @@
+#
 # MIT License
 #
 # Copyright(c) 2011-2019 The Maintainers of Nanvix
@@ -19,40 +20,138 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-# Memory Size
-MEMSIZE=4M
-
-# Number of Cores
-NCORES=2
+#
 
 #
-# Runs a binary in the QEMU OpenRISC target.
+# Sets up development tools.
+#
+function setup_toolchain
+{
+	# Required variables.
+	local CURDIR=`pwd`
+	local WORKDIR=$CURDIR/toolchain/or1k
+	local PREFIX=$WORKDIR
+	local TARGET=or1k-elf
+	local COMMIT=ccfd3f43e29a0b02249ffb3a256330a3717cca18
+
+	# Retrieve the number of processor cores
+	local NCORES=`grep -c ^processor /proc/cpuinfo`
+
+	mkdir -p $WORKDIR
+	cd $WORKDIR
+
+	# Get toolchain.
+	wget "https://github.com/nanvix/toolchain/archive/$COMMIT.zip"
+	unzip $COMMIT.zip
+	mv toolchain-$COMMIT/* .
+
+	# Cleanup.
+	rm -rf toolchain-$COMMIT
+	rm -rf $COMMIT.zip
+
+	# Build binutils.
+	cd binutils*/
+	./configure --target=$TARGET --prefix=$PREFIX --disable-nls --disable-sim
+	make -j $NCORES all
+	make install
+
+	# Cleanup.
+	cd $WORKDIR
+	rm -rf binutils*
+
+	# Build GCC.
+	cd gcc*/
+	./contrib/download_prerequisites
+	mkdir build
+	cd build
+	../configure --target=$TARGET --prefix=$PREFIX --disable-nls --enable-languages=c --without-headers
+	make -j $NCORES all-gcc
+	make -j $NCORES all-target-libgcc
+	make install-gcc
+	make install-target-libgcc
+
+	# Cleanup.
+	cd $WORKDIR
+	rm -rf gcc*
+
+	# Build GDB.
+	cd $WORKDIR
+	cd gdb*/
+	./configure --target=$TARGET --prefix=$PREFIX --with-auto-load-safe-path=/ --with-guile=no
+	make -j $NCORES
+	make install
+
+	# Cleanup.
+	cd $WORKDIR
+	rm -rf gdb*
+
+	# Back to the current folder
+	cd $CURDIR
+}
+
+#
+# Builds system image.
+#
+function build
+{
+	# Nothing to do.
+	echo ""
+}
+
+#
+# Runs a binary in the platform (simulator).
 #
 function run
 {
 	local image=$1
-	local binary=$2
-	local target=$3
-	local variant=$4
-	local mode=$5
-		
+	local bindir=$2
+	local binary=$3
+	local target=$4
+	local variant=$5
+	local mode=$6
+	local timeout=$7
+
+	# Target configuration.
+	local MEMSIZE=128M # Memory Size
+	local NCORES=2     # Number of Cores
+
 	if [ $mode == "--debug" ];
 	then
-		qemu-system-or1k -s -S \
-			-kernel $binary    \
-			-serial stdio      \
-			-display none      \
-			-m $MEMSIZE        \
-			-mem-prealloc      \
+		qemu-system-or1k -s -S      \
+			-kernel $bindir/$binary \
+			-serial stdio           \
+			-display none           \
+			-m $MEMSIZE             \
+			-mem-prealloc           \
 			-smp $NCORES
 	else
-		qemu-system-or1k    \
-			-kernel $binary \
-			-serial stdio   \
-			-display none   \
-			-m $MEMSIZE     \
-			-mem-prealloc   \
-			-smp $NCORES
+		if [ ! -z $timeout ];
+		then
+			timeout --foreground $timeout \
+			qemu-system-or1k -s           \
+				-kernel $bindir/$binary   \
+				-serial stdio             \
+				-display none             \
+				-m $MEMSIZE               \
+				-mem-prealloc             \
+				-smp $NCORES              \
+			|& tee $OUTFILE
+			line=$(cat $OUTFILE | tail -2 | head -1)
+			if [ "$line" = "[hal] powering off..." ];
+			then
+				echo "Succeed !"
+			else
+				echo "Failed !"
+				return -1
+			fi
+		else
+			qemu-system-or1k -s         \
+				-kernel $bindir/$binary \
+				-serial stdio           \
+				-display none           \
+				-m $MEMSIZE             \
+				-mem-prealloc           \
+				-smp $NCORES
+		fi
 	fi
 }
