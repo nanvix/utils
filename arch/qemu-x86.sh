@@ -131,7 +131,7 @@ function run
 	# be careful changing those values, they are also hard coded in the qemu-x86.sh script
 	# but I don't know the proper way to make them dependant.
 	local mac=52:55:00:d1:55:01
-	local TAP_NAME=nanvix-tap
+	local TAP_NAME=nanvix-tap1
 
 	check_network
 
@@ -145,7 +145,7 @@ function run
 			-kernel $bindir/$binary \
 			-m $MEMSIZE             \
 			-mem-prealloc			\
-			-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \
+			-netdev tap,id=t0,ifname=$TAP_NAME,script=no,downscript=no \
 			-device rtl8139,netdev=t0,id=nic0,mac=$mac
 	else
 		if [ ! -z $timeout ];
@@ -156,7 +156,7 @@ function run
 				-kernel $bindir/$binary \
 				-m $MEMSIZE             \
 				-mem-prealloc			\
-				-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \
+				-netdev tap,id=t0,ifname=$TAP_NAME,script=no,downscript=no \
 				-device rtl8139,netdev=t0,id=nic0,mac=$mac \
 			|& tee $OUTFILE
 			line=$(cat $OUTFILE | tail -2 | head -1)
@@ -173,7 +173,7 @@ function run
 				-kernel $bindir/$binary \
 				-m $MEMSIZE             \
 				-mem-prealloc			\
-				-netdev tap,id=t0,ifname=nanvix-tap,script=no,downscript=no \
+				-netdev tap,id=t0,ifname=$TAP_NAME,script=no,downscript=no \
 				-device rtl8139,netdev=t0,id=nic0,mac=$mac
 		fi
 	fi
