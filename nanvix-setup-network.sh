@@ -28,7 +28,8 @@
 
 # Script Arguments
 COMMAND=$1  # Command, either on or off
-IS_ROOT=$2  # Running as root?
+TAP_NB=$2  # Command, either on or off
+IS_ROOT=$3  # Running as root?
 
 #
 # Get name of target user.
@@ -39,8 +40,6 @@ then
 	USERNAME="root"
 fi
 
-
-
 # Global Variables
 export SCRIPT_NAME=$0
 
@@ -50,10 +49,14 @@ export SCRIPT_NAME=$0
 # Careful when changing these valies. They are
 # hard coded in the in target-specific scripts.
 #
-TAP_NAME=nanvix-tap
-IP_ADDR=192.168.66.66
+TAP_NAME_PREFIX=nanvix-tap
+IP_ADDR_PREFIX=192.169.66.
+MAC_ADDR_PREFIX=52:55:00:d1:55:
+IP_BRIDGE=200
 IP_NETMASK_CIDR=24
 IP_NETMASK=255.255.255.0
+
+BRIDGE_NAME=nanvix-bridge
 
 #==============================================================================
 # usage()
@@ -64,7 +67,7 @@ IP_NETMASK=255.255.255.0
 #
 function usage
 {
-	echo "$SCRIPT_NAME <on | off> [--root]"
+	echo "$SCRIPT_NAME <on | off | on2 | off2> <number of instances [1 .. 99]> [--root]"
 	exit 1
 }
 
@@ -86,9 +89,24 @@ function check_args
 
 	case $COMMAND in
 		"on" | "off")
+			TAP_NB=1
+			;;
+		"on2" | "off2")
+			if [[ ! $TAP_NB =~ ^[0-9]+$ ]]
+			then
+				echo "$SCRIPT_NAME: bad command"
+				usage
+			fi
+
+			if [ "$TAP_NB" -ge 100 -o "$TAP_NB" -le 0 ]
+			then
+				echo "$SCRIPT_NAME: bad command"
+				usage
+			fi
+
 			;;
 		*)
-			echo "$SCRIPT_NAME: bad command"
+		echo "$SCRIPT_NAME: bad command"
 			usage
 			;;
 	esac
@@ -96,11 +114,7 @@ function check_args
 
 #==============================================================================
 
-#
-# Setup a TAP interface and a bridge, link them together and
-# give the TAP interface an IP adress
-#
-function on
+function on_multiple
 {
 	# We don't have tunctl.
 	if  [ $(which tunctl > /dev/null) ];
@@ -123,52 +137,75 @@ function on
 		exit 1
 	fi
 
-	# Create device node.
-	if [ ! -e /dev/net/$TAP_NAME ];
-	then
-		mknod /dev/net/$TAP_NAME c 10 200
-		chown $USERNAME:$USERNAME /dev/net/$TAP_NAME
-	fi
+	ip link add name $BRIDGE_NAME type bridge
+	IP_ADDR=$IP_ADDR_PREFIX$IP_BRIDGE
+	ip addr add $IP_ADDR/$IP_NETMASK_CIDR dev $BRIDGE_NAME
+	ip link set dev $BRIDGE_NAME up
 
-	# Create tap interface.
-	if [ ! -e /sys/class/net/$TAP_NAME ];
-	then
-		tunctl -t $TAP_NAME -u $USERNAME > /dev/null
-	fi
+	for (( i=1; i<=$TAP_NB; i++ ))
+	do
+		TAP_NAME=$TAP_NAME_PREFIX$i
+		IP_ADDR=$IP_ADDR_PREFIX$i
+		MAC_ADDR=$MAC_ADDR_PREFIX$i
+		# Create device node.
+		if [ ! -e /dev/net/$TAP_NAME ];
+		then
+			mknod /dev/net/$TAP_NAME c 10 200
+			chown $USERNAME:$USERNAME /dev/net/$TAP_NAME
+		fi
 
-	# Setup tap interface.
-	ip addr add $IP_ADDR/$IP_NETMASK_CIDR dev $TAP_NAME
-	ifconfig $TAP_NAME $IP_ADDR netmask $IP_NETMASK up
-	ifconfig $TAP_NAME hw ether 52:55:00:d1:55:01
-	ip link set dev $TAP_NAME up
+		# Create tap interface.
+		if [ ! -e /sys/class/net/$TAP_NAME ];
+		then
+			tunctl -t $TAP_NAME -u $USERNAME > /dev/null
+		fi
+
+		# Setup tap interface.
+		ip addr add $IP_ADDR/$IP_NETMASK_CIDR dev $TAP_NAME
+		ifconfig $TAP_NAME $IP_ADDR netmask $IP_NETMASK up
+		ifconfig $TAP_NAME hw ether $MAC_ADDR
+		ip link set dev $TAP_NAME up
+
+		# Adding interface to the bridge
+		ip link set dev $TAP_NAME master $BRIDGE_NAME
+	done
 
 	echo "Network interface successfully setup!"
 	echo "Remember that you can remove the interfaces:"
-	echo "    bash $SCRIPT_NAME off"
+	echo "    bash $SCRIPT_NAME off $TAP_NB"
 }
 
-#
-# Remove the previously created interfaces
-#
-function off
+function off_multiple
 {
-	ip addr delete $IP_ADDR/$IP_NETMASK_CIDR dev $TAP_NAME
-	ifconfig $TAP_NAME down
-	ip link delete dev $TAP_NAME
-	tunctl -d $TAP_NAME > /dev/null
-	unlink /dev/net/$TAP_NAME
+	for (( i=1; i<=$TAP_NB; i++ ))
+	do
+		TAP_NAME=$TAP_NAME_PREFIX$i
+		IP_ADDR=$IP_ADDR_PREFIX$i
+		MAC_ADDR=$MAC_ADDR_PREFIX$i
+
+		ip addr delete $IP_ADDR/$IP_NETMASK_CIDR dev $TAP_NAME
+		ifconfig $TAP_NAME down
+		ip link delete dev $TAP_NAME
+		tunctl -d $TAP_NAME > /dev/null
+		unlink /dev/net/$TAP_NAME
+	done
+
+	ip addr delete $IP_ADDR_PREFIX$IP_BRIDGE/$IP_NETMASK_CIDR dev $BRIDGE_NAME
+	ifconfig $BRIDGE_NAME down
+	ip link delete dev $BRIDGE_NAME
 
     echo "Network interface successfully removed!"
 }
+
 
 check_args
 
 case $COMMAND in
     "on")
-        on
+        on_multiple
         ;;
     "off")
-        off
+        off_multiple
         ;;
     *) # Should never happen
         echo "$SCRIPT_NAME: bad command [on | off]"
