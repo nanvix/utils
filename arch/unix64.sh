@@ -52,20 +52,33 @@ function run
 	local variant=$5
 	local mode=$6
 	local timeout=$7
+	local cmd=""
 
 	# Target configuration.
 	local MEMSIZE=128M # Memory Size
-	local NCORES=4     # Number of Cores
+	local NCLUSTERS=16 # Number of Clusters
+
+	case $variant in
+		"all")
+			cmd="$bindir/$binary --nclusters $NCLUSTERS"
+			;;
+		"iocluster")
+			cmd="$bindir/$binary --nclusters 1"
+			;;
+		"ccluster")
+			cmd="$bindir/$binary --nclusters 1"
+			;;
+	esac
 
 	if [ $mode == "--debug" ];
 	then
-		gdb $bindir/$binary
+		gdb $cmd
 	else
 		if [ ! -z $timeout ];
 		then
 		    echo "oui"$timeout
-			timeout --foreground  $timeout \
-				$bindir/$binary            \
+			timeout --foreground $timeout \
+				$cmd                      \
 			|& tee $OUTFILE
 			line=$(cat $OUTFILE | tail -1)
 			if [ "$line" = "[hal] powering off..." ];
@@ -76,7 +89,7 @@ function run
 				return -1
 			fi
 		else
-			$bindir/$binary
+			$cmd
 		fi
 	fi
 }
