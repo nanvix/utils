@@ -72,7 +72,7 @@ function run
 
 	if [ $mode == "--debug" ];
 	then
-		gdb $cmd
+		gdbserver localhost:1234 $cmd
 	else
 		if [ ! -z $timeout ];
 		then
