@@ -56,7 +56,7 @@ function run
 
 	# Target configuration.
 	local MEMSIZE=128M # Memory Size
-	local NCLUSTERS=16 # Number of Clusters
+	local NCLUSTERS=18 # Number of Clusters
 
 	case $variant in
 		"all")
