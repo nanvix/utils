@@ -56,7 +56,7 @@ function run
 
 	# Target configuration.
 	local MEMSIZE=128M # Memory Size
-	local NCLUSTERS=16 # Number of Clusters
+	local NCLUSTERS=18 # Number of Clusters
 
 	case $variant in
 		"all")
@@ -66,7 +66,8 @@ function run
 			cmd="$bindir/$binary --nclusters 1"
 			;;
 		"ccluster")
-			cmd="$bindir/$binary --nclusters 1"
+			echo "error: cluster variant not supported"
+			exit 0
 			;;
 	esac
 
