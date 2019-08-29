@@ -66,7 +66,8 @@ function run
 			cmd="$bindir/$binary --nclusters 1"
 			;;
 		"ccluster")
-			cmd="$bindir/$binary --nclusters 1"
+			echo "error: cluster variant not supported"
+			exit 0
 			;;
 	esac
 
