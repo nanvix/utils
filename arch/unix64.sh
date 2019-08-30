@@ -77,7 +77,7 @@ function run
 	else
 		if [ ! -z $timeout ];
 		then
-		    echo "oui"$timeout
+		    echo $timeout
 			timeout --foreground $timeout \
 				$cmd                      \
 			|& tee $OUTFILE
