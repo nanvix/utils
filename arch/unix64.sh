@@ -77,9 +77,8 @@ function run
 	else
 		if [ ! -z $timeout ];
 		then
-		    echo $timeout
-			timeout --foreground $timeout \
-				$cmd                      \
+			timeout --foreground $timeout     \
+				$bindir/$binary --nclusters 2 \
 			|& tee $OUTFILE
 			line=$(cat $OUTFILE | tail -1)
 			if [ "$line" = "[hal] powering off..." ];
