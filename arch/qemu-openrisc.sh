@@ -114,28 +114,52 @@ function run
 	# Target configuration.
 	local MEMSIZE=128M # Memory Size
 	local NCORES=2     # Number of Cores
+ 
+ 	if [ -z "$IMAGE_ID" ]
+	then
+		IMAGE_ID=1
+	else
+		local binary=$binary$IMAGE_ID
+	fi
+
+	local tapname="nanvix-tap"$IMAGE_ID
+	local gdb_tcp_port="1234"$IMAGE_ID
+	local mac="52:54:00:12:34:"$IMAGE_ID
+
+	local qemu_command='qemu-system-or1k	
+						-gdb tcp::$gdb_tcp_port
+						-kernel $bindir/$binary
+						-serial stdio          
+						-display none          
+						-m $MEMSIZE            
+						-mem-prealloc          
+						-smp $NCORES           
+						-net nic,macaddr=$mac -net tap,ifname=$tapname,script=no,downscript=no'
 
 	if [ $mode == "--debug" ];
 	then
-		qemu-system-or1k -s -S      \
-			-kernel $bindir/$binary \
-			-serial stdio           \
-			-display none           \
-			-m $MEMSIZE             \
-			-mem-prealloc           \
-			-smp $NCORES
+		if [ -z "$NB_IMAGES" ]
+			then
+				local command="$qemu_command -S" 
+				eval $command
+			else
+				for (( i=1; i<=$NB_IMAGES; i++ ))
+				do
+					local tapname="nanvix-tap"$i
+					local gdb_tcp_port="1234"$i
+					local binary="test-driver"$i
+					local mac="52:54:00:12:34:"$i
+
+					local command="xterm -e \" $qemu_command -S \" &"
+					eval $command
+				done
+			fi
 	else
 		if [ ! -z $timeout ];
 		then
-			timeout --foreground $timeout \
-			qemu-system-or1k -s           \
-				-kernel $bindir/$binary   \
-				-serial stdio             \
-				-display none             \
-				-m $MEMSIZE               \
-				-mem-prealloc             \
-				-smp $NCORES              \
-			|& tee $OUTFILE
+			local command="timeout --foreground $timeout $qemu_command |& tee $OUTFILE"
+			eval $command
+
 			line=$(cat $OUTFILE | tail -2 | head -1)
 			if [ "$line" = "[hal] powering off..." ] || [ "$line" = "[hal] halting..." ];
 			then
@@ -145,13 +169,22 @@ function run
 				return -1
 			fi
 		else
-			qemu-system-or1k -s         \
-				-kernel $bindir/$binary \
-				-serial stdio           \
-				-display none           \
-				-m $MEMSIZE             \
-				-mem-prealloc           \
-				-smp $NCORES
+			if [ -z "$NB_IMAGES" ]
+			then
+				local command="$qemu_command"
+				eval $qemu_command
+			else
+				for (( i=1; i<=$NB_IMAGES; i++ ))
+				do
+					local tapname="nanvix-tap"$i
+					local gdb_tcp_port="1234"$i
+					local binary="test-driver"$i
+					local mac="52:54:00:12:34:"$i
+
+					local command="xterm -e \" $qemu_command \" &"
+					eval $command
+				done
+			fi
 		fi
 	fi
 }

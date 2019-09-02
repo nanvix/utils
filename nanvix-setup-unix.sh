@@ -29,3 +29,4 @@
 
 #Setup Perf file
 sysctl kernel.perf_event_paranoid=-1
+echo 256 > /proc/sys/fs/mqueue/msg_max
