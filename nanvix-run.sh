@@ -23,9 +23,9 @@
 #
 
 # Script Arguments
-IMAGE=$1    # Image
+IMAGE=$1    # Image File Name
 BINDIR=$2   # Binary Directory
-BINARY=$3   # Binary
+BINARIES=$3 # List of Binaries
 TARGET=$4   # Target
 VARIANT=$5  # Target Variant
 MODE=$6     # Run Mode
@@ -35,7 +35,7 @@ ARGS=$8     # Image Arguments
 # Global Variables
 export SCRIPT_NAME=$0
 export SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
-export OUTFILE="nanvix-run.output"
+export OUTFILE="nanvix-cluster"
 
 #==============================================================================
 # usage()
@@ -108,7 +108,7 @@ then
 	echo "VARIANT     = $VARIANT"
 	echo "IMAGE       = $IMAGE"
 	echo "BINDIR      = $BINDIR"
-	echo "BINARY      = $BINARY"
+	echo "BINARIES    = $BINARIES"
 	echo "MODE        = $MODE"
 	echo "TIMEOUT     = $TIMEOUT"
 	echo "ARGS        = $ARGS"
@@ -132,5 +132,7 @@ case "$TARGET" in
 		;;
 esac
 
-rm -f $OUTFILE
-run $IMAGE $BINDIR $BINARY $TARGET $VARIANT $MODE $TIMEOUT $ARGS
+# House keeping.
+rm -f $OUTFILE*
+
+run $IMAGE $BINDIR "$BINARIES" $TARGET $VARIANT $MODE $TIMEOUT $ARGS
