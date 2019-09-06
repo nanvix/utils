@@ -23,6 +23,23 @@
 #
 
 #
+# Number of clusters (deprecated).
+#
+NCLUSTERS=18
+
+#
+# Boot delay.
+#
+# Adust this so as to force cluster 0 to be the first one to boot.
+#
+BOOT_DELAY=2
+
+#
+# GDB Port.
+#
+GDB_PORT=1234
+
+#
 # Sets up development tools.
 #
 function setup_toolchain
@@ -36,8 +53,87 @@ function setup_toolchain
 #
 function build
 {
-	# Nothing to do.
-	echo ""
+	local image=$1
+	local bindir=$2
+	local binaries=$3
+
+	# Create multi-binary image.
+	truncate -s 0 $image
+	for binary in $binaries;
+	do
+		echo $binary >> $image
+	done
+}
+
+#
+# Parses an execution output.
+#
+# $1 Output file.
+#
+function parse_output
+{
+	local outfile=$1
+
+	line=$(cat $outfile | tail -1)
+	if [ "$line" = "[hal] powering off..." ];
+	then
+		echo "Succeed !"
+	else
+		echo "Failed !"
+		return -1
+	fi
+
+	return 0
+}
+
+#
+# Spawns binaries.
+#
+# $1 Binary directory.
+# $2 Multibinary image.
+# $3 Spawn mode.
+#
+function spawn_binaries
+{
+	local bindir=$1
+	local image=$2
+	local mode=$3
+	local timeout=$4
+	local cmd=""
+
+	let i=0
+
+	echo $image
+	cat $image
+
+	while read -r binary;
+	do
+		echo "spawning $binary..."
+
+		cmd="$bindir/$binary --nclusters $NCLUSTERS"
+
+		if [ ! -z $timeout ];
+		then
+			cmd="timeout --foreground $timeout $cmd"
+		fi
+
+		# Spawn cluster.
+		if [ $mode == "--debug" ];
+		then
+			gdbserver localhost:$(($GDB_PORT + $i)) $cmd &
+		else
+			if [ $i == "0" ]; then
+				$cmd |& tee $OUTFILE-$i &
+			else
+				$cmd 2> $OUTFILE-$i &
+			fi	
+		fi
+
+		# Force cluster to boot.
+		sleep $BOOT_DELAY
+
+		let i++
+	done < "$image"
 }
 
 #
@@ -45,51 +141,36 @@ function build
 #
 function run
 {
-	local image=$1
-	local bindir=$2
-	local binary=$3
-	local target=$4
-	local variant=$5
-	local mode=$6
-	local timeout=$7
-	local cmd=""
+	local image=$1    # Multibinary image.
+	local bindir=$2   # Binary directory.
+	local binaries=$3 # List of binaries (unused).
+	local target=$4   # Target (unused).
+	local variant=$5  # Cluster variant (unused)
+	local mode=$6     # Spawn mode (run or debug).
+	local timeout=$7  # Timeout for test mode.
+	local ret=0       # Return value.
 
-	# Target configuration.
-	local MEMSIZE=128M # Memory Size
-	local NCLUSTERS=16 # Number of Clusters
-
-	case $variant in
-		"all")
-			cmd="$bindir/$binary --nclusters $NCLUSTERS"
-			;;
-		"iocluster")
-			cmd="$bindir/$binary --nclusters 1"
-			;;
-		"ccluster")
-			echo "error: cluster variant not supported"
-			exit 0
-			;;
-	esac
-
-	if [ $mode == "--debug" ];
+	# Test
+	if [ ! -z $timeout ];
 	then
-		gdbserver localhost:1234 $cmd
+		spawn_binaries $bindir $image "--test" $timeout
+
+		# Parse output.
+		wait
+
+		parse_output $OUTFILE-0
+		ret=$?
+
+	# Run/Debug
 	else
-		if [ ! -z $timeout ];
-		then
-			timeout --foreground $timeout     \
-				$bindir/$binary --nclusters 2 \
-			|& tee $OUTFILE
-			line=$(cat $OUTFILE | tail -1)
-			if [ "$line" = "[hal] powering off..." ];
-			then
-				echo "Succeed !"
-			else
-				echo "Failed !"
-				return -1
-			fi
-		else
-			$cmd
-		fi
+		spawn_binaries $bindir $image $mode
 	fi
+
+	wait
+
+	# House keeping.
+	rm -rf /dev/mqueue/*nanvix-*
+	rm -rf /dev/shm/*nanvix-*
+
+	return $ret
 }
