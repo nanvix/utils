@@ -103,9 +103,6 @@ function spawn_binaries
 
 	let i=0
 
-	echo $image
-	cat $image
-
 	while read -r binary;
 	do
 		echo "spawning $binary..."
