@@ -75,7 +75,7 @@ function parse_output
 	local outfile=$1
 
 	line=$(cat $outfile | tail -1)
-	if [ "$line" = "[hal] powering off..." ];
+	if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
 	then
 		echo "Succeed !"
 	else
