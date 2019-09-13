@@ -32,7 +32,7 @@ NCLUSTERS=18
 #
 # Adust this so as to force cluster 0 to be the first one to boot.
 #
-BOOT_DELAY=2
+BOOT_DELAY=1
 
 #
 # GDB Port.
