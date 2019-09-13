@@ -32,7 +32,7 @@ NCLUSTERS=18
 #
 # Adust this so as to force cluster 0 to be the first one to boot.
 #
-BOOT_DELAY=2
+BOOT_DELAY=1
 
 #
 # GDB Port.
@@ -75,7 +75,7 @@ function parse_output
 	local outfile=$1
 
 	line=$(cat $outfile | tail -1)
-	if [ "$line" = "[hal] powering off..." ];
+	if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
 	then
 		echo "Succeed !"
 	else

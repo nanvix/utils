@@ -133,6 +133,7 @@ case "$TARGET" in
 esac
 
 # House keeping.
-rm -f $OUTFILE*
+touch $OUTFILE-0
+truncate -s 0 $OUTFILE*
 
 run $IMAGE $BINDIR "$BINARIES" $TARGET $VARIANT $MODE $TIMEOUT $ARGS

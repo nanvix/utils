@@ -95,7 +95,7 @@ function run
 				-- $args                         \
 			|& tee $OUTFILE
 			line=$(cat $OUTFILE | tail -1 )
-			if [[ $line == *"[hal] powering off..." ]];
+			if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
 			then
 				echo "Succeed !"
 			else
