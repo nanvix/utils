@@ -67,7 +67,7 @@ BRIDGE_NAME=nanvix-bridge
 #
 function usage
 {
-	echo "$SCRIPT_NAME <on | off | on2 | off2> <number of instances [1 .. 99]> [--root]"
+	echo "$SCRIPT_NAME <on | off> <number of instances [1 .. 99]> [--root]"
 	exit 1
 }
 
@@ -87,29 +87,32 @@ function check_args
 		usage
 	fi
 
-	case $COMMAND in
-		"on" | "off")
-			TAP_NB=1
-			;;
-		"on2" | "off2")
+	# If there is a command
+	if [ $COMMAND == "on" ] || [ $COMMAND == "off" ];
+	then
+		# If there is a number of interfaces
+		if [ ! -z $TAP_NB ];
+		then
+			# Check if valid
 			if [[ ! $TAP_NB =~ ^[0-9]+$ ]]
 			then
 				echo "$SCRIPT_NAME: bad command"
 				usage
 			fi
 
+			# Valid range
 			if [ "$TAP_NB" -ge 100 -o "$TAP_NB" -le 0 ]
 			then
 				echo "$SCRIPT_NAME: bad command"
 				usage
 			fi
-
-			;;
-		*)
+		else
+			TAP_NB=1
+		fi
+	else
 		echo "$SCRIPT_NAME: bad command"
-			usage
-			;;
-	esac
+		usage
+	fi
 }
 
 #==============================================================================
@@ -151,7 +154,7 @@ function on_multiple
 		if [ ! -e /dev/net/$TAP_NAME ];
 		then
 			mknod /dev/net/$TAP_NAME c 10 200
-			chown $USERNAME:$USERNAME /dev/net/$TAP_NAME
+			chown $USERNAME:$(id -g) /dev/net/$TAP_NAME
 		fi
 
 		# Create tap interface.
