@@ -23,6 +23,18 @@
 #
 
 #
+# Boot delay.
+#
+# Adust this so as to force cluster 0 to be the first one to boot.
+#
+BOOT_DELAY=2
+
+#
+# GDB Port.
+#
+GDB_PORT=1234
+
+#
 # Sets up development tools.
 #
 function setup_toolchain
@@ -94,8 +106,105 @@ function setup_toolchain
 #
 function build
 {
-	# Nothing to do.
-	echo ""
+	local image=$1
+	local bindir=$2
+	local binaries=$3
+
+	# Create multi-binary image.
+	truncate -s 0 $image
+	for binary in $binaries;
+	do
+		echo $binary >> $image
+	done
+}
+
+#
+# Parses an execution output.
+#
+# $1 Output file.
+#
+function parse_output
+{
+	local outfile=$1
+
+	line=$(cat $outfile | tail -1)
+	if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
+	then
+		echo "Succeed !"
+	else
+		echo "Failed !"
+		return -1
+	fi
+
+	return 0
+}
+
+#
+# Spawns binaries.
+#
+# $1 Binary directory.
+# $2 Multibinary image.
+# $3 Spawn mode.
+# $4 Timeout.
+#
+function spawn_binaries
+{
+	local bindir=$1
+	local image=$2
+	local mode=$3
+	local timeout=$4
+	local cmd=""
+
+	let i=0
+
+	# Target configuration.
+	local MEMSIZE=128M # Memory Size
+	local NCORES=2     # Number of Cores
+	local IMAGE_ID=1   # Image ID
+
+	qemu_cmd="qemu-system-or1k
+			-serial stdio
+			-display none
+			-m $MEMSIZE
+			-mem-prealloc
+			-smp $NCORES"
+
+	for binary in `cat $image`;
+	do
+		local tapname="nanvix-tap"$IMAGE_ID
+		local mac="52:54:00:12:34:"$IMAGE_ID
+
+		cmd="$qemu_cmd -gdb tcp::$GDB_PORT"
+		cmd="$cmd -kernel $bindir/$binary"
+		cmd="$cmd -net nic,macaddr=$mac -net tap,ifname=$tapname,script=no,downscript=no"
+
+		echo "spawning $binary $IMAGE_ID..."
+
+		if [ ! -z $timeout ];
+		then
+			cmd="timeout --foreground $timeout $cmd"
+		fi
+
+		# Spawn cluster.
+		if [ $mode == "--debug" ];
+		then
+			cmd="$cmd -S"
+			$cmd &
+		else
+			if [ $i == "0" ]; then
+				$cmd |& tee $OUTFILE-$i &
+			else
+				$cmd &> $OUTFILE-$i &
+			fi
+		fi
+
+		# Force cluster to boot.
+		sleep $BOOT_DELAY
+
+		let i++
+		let IMAGE_ID++
+		let GDB_PORT++
+	done
 }
 
 #
@@ -103,88 +212,32 @@ function build
 #
 function run
 {
-	local image=$1
-	local bindir=$2
-	local binary=$3
-	local target=$4
-	local variant=$5
-	local mode=$6
-	local timeout=$7
+	local image=$1    # Multibinary image.
+	local bindir=$2   # Binary directory.
+	local binaries=$3 # List of binaries (unused).
+	local target=$4   # Target (unused).
+	local variant=$5  # Cluster variant (unused)
+	local mode=$6     # Spawn mode (run or debug).
+	local timeout=$7  # Timeout for test mode.
+	local ret=0       # Return value.
 
-	# Target configuration.
-	local MEMSIZE=128M # Memory Size
-	local NCORES=2     # Number of Cores
- 
- 	if [ -z "$IMAGE_ID" ]
+	# Test
+	if [ ! -z $timeout ];
 	then
-		IMAGE_ID=1
+		spawn_binaries $bindir $image $mode $timeout
+
+		# Parse output.
+		wait
+
+		parse_output $OUTFILE-0
+		ret=$?
+
+	# Run/Debug
 	else
-		local binary=$binary$IMAGE_ID
+		spawn_binaries $bindir $image $mode
 	fi
 
-	local tapname="nanvix-tap"$IMAGE_ID
-	local gdb_tcp_port="1234"$IMAGE_ID
-	local mac="52:54:00:12:34:"$IMAGE_ID
+	wait
 
-	local qemu_command='qemu-system-or1k	
-						-gdb tcp::$gdb_tcp_port
-						-kernel $bindir/$binary
-						-serial stdio          
-						-display none          
-						-m $MEMSIZE            
-						-mem-prealloc          
-						-smp $NCORES           
-						-net nic,macaddr=$mac -net tap,ifname=$tapname,script=no,downscript=no'
-
-	if [ $mode == "--debug" ];
-	then
-		if [ -z "$NB_IMAGES" ]
-			then
-				local command="$qemu_command -S" 
-				eval $command
-			else
-				for (( i=1; i<=$NB_IMAGES; i++ ))
-				do
-					local tapname="nanvix-tap"$i
-					local gdb_tcp_port="1234"$i
-					local binary="test-driver"$i
-					local mac="52:54:00:12:34:"$i
-
-					local command="xterm -e \" $qemu_command -S \" &"
-					eval $command
-				done
-			fi
-	else
-		if [ ! -z $timeout ];
-		then
-			local command="timeout --foreground $timeout $qemu_command |& tee $OUTFILE"
-			eval $command
-
-			line=$(cat $OUTFILE | tail -2 | head -1)
-			if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
-			then
-				echo "Succeed !"
-			else
-				echo "Failed !"
-				return -1
-			fi
-		else
-			if [ -z "$NB_IMAGES" ]
-			then
-				local command="$qemu_command"
-				eval $qemu_command
-			else
-				for (( i=1; i<=$NB_IMAGES; i++ ))
-				do
-					local tapname="nanvix-tap"$i
-					local gdb_tcp_port="1234"$i
-					local binary="test-driver"$i
-					local mac="52:54:00:12:34:"$i
-
-					local command="xterm -e \" $qemu_command \" &"
-					eval $command
-				done
-			fi
-		fi
-	fi
+	return $ret
 }
