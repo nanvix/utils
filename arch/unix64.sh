@@ -147,6 +147,10 @@ function run
 	local timeout=$7  # Timeout for test mode.
 	local ret=0       # Return value.
 
+	# Ensure clean environment.
+	rm -rf /dev/mqueue/*nanvix*
+	rm -rf /dev/shm/*nanvix*
+
 	# Test
 	if [ ! -z $timeout ];
 	then
@@ -166,8 +170,8 @@ function run
 	wait
 
 	# House keeping.
-	rm -rf /dev/mqueue/*nanvix-*
-	rm -rf /dev/shm/*nanvix-*
+	rm -rf /dev/mqueue/*nanvix*
+	rm -rf /dev/shm/*nanvix*
 
 	return $ret
 }
