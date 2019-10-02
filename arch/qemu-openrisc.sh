@@ -192,7 +192,7 @@ function spawn_binaries
 			$cmd &
 		else
 			if [ $i == "0" ]; then
-				$cmd |& tee $OUTFILE-$i &
+				$cmd | tee $OUTFILE-$i &
 			else
 				$cmd &> $OUTFILE-$i &
 			fi

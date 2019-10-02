@@ -29,16 +29,6 @@
 # Script Arguments
 COMMAND=$1  # Command, either on or off
 TAP_NB=$2  # Command, either on or off
-IS_ROOT=$3  # Running as root?
-
-#
-# Get name of target user.
-#
-USERNAME=$SUDO_USER
-if [ ! -z $IS_ROOT ] && [ $IS_ROOT == "--root" ];
-then
-	USERNAME="root"
-fi
 
 # Global Variables
 export SCRIPT_NAME=$0
@@ -67,7 +57,7 @@ BRIDGE_NAME=nanvix-bridge
 #
 function usage
 {
-	echo "$SCRIPT_NAME <on | off> <number of instances [1 .. 99]> [--root]"
+	echo "$SCRIPT_NAME <on | off> <number of instances [1 .. 99]>"
 	exit 1
 }
 
@@ -154,13 +144,13 @@ function on_multiple
 		if [ ! -e /dev/net/$TAP_NAME ];
 		then
 			mknod /dev/net/$TAP_NAME c 10 200
-			chown $USERNAME:$(id -g) /dev/net/$TAP_NAME
+			chown $(id -u):$(id -g) /dev/net/$TAP_NAME
 		fi
 
 		# Create tap interface.
 		if [ ! -e /sys/class/net/$TAP_NAME ];
 		then
-			tunctl -t $TAP_NAME -u $USERNAME > /dev/null
+			tunctl -t $TAP_NAME -u $(id -un) > /dev/null
 		fi
 
 		# Setup tap interface.
@@ -215,4 +205,3 @@ case $COMMAND in
         exit 1
         ;;
 esac
-
