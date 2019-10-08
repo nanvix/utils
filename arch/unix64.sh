@@ -55,11 +55,11 @@ function build
 {
 	local image=$1
 	local bindir=$2
-	local binaries=$3
+	local imgsrc=$3
 
 	# Create multi-binary image.
 	truncate -s 0 $image
-	for binary in $binaries;
+	for binary in `cat $imgsrc`;
 	do
 		echo $binary >> $image
 	done
@@ -140,11 +140,10 @@ function run
 {
 	local image=$1    # Multibinary image.
 	local bindir=$2   # Binary directory.
-	local binaries=$3 # List of binaries (unused).
-	local target=$4   # Target (unused).
-	local variant=$5  # Cluster variant (unused)
-	local mode=$6     # Spawn mode (run or debug).
-	local timeout=$7  # Timeout for test mode.
+	local target=$3   # Target (unused).
+	local variant=$4  # Cluster variant (unused)
+	local mode=$5     # Spawn mode (run or debug).
+	local timeout=$6  # Timeout for test mode.
 	local ret=0       # Return value.
 
 	# Ensure clean environment.

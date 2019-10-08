@@ -40,14 +40,54 @@ function build
 {
 	local image=$1
 	local bindir=$2
-	local binary=$3
-	local iobin=$binary-k1bio
-	local nodebin=$binary-k1bdp
+	local imgsrc=$3
+	local ios=""
+	local clusters=""
 
-	$K1_TOOLCHAIN_DIR/bin/k1-create-multibinary \
-		--boot $bindir/$iobin                   \
-		--clusters $bindir/$nodebin             \
-		-T $image -f
+	# Create multi-binary image.
+	truncate -s 0 $image
+	for binary in `cat $imgsrc`;
+	do
+		clusterid=`echo $binary | cut -d ":" -f 1`
+		bin=`echo $binary | cut -d ":" -f 2`
+
+		# Rename binary.
+		cp $bindir/$bin $bindir/$clusterid.mppa256
+
+		if [[ "$bin" = *"k1bdp" ]];
+		then
+			clusters="bin/$clusterid.mppa256,$clusters"
+		else
+			ios="bin/$clusterid.mppa256,$ios"
+		fi
+	done
+
+	# Get boot cluster.
+	boot=`echo $ios | cut -d "," -f 1`
+	ios=`echo $ios | cut -d "," -f 2-`
+
+	# Remove commas.
+	ios=${ios%?}
+	clusters=${clusters%?}
+
+	echo "BOOT = $boot"
+	echo "IOS = $ios"
+	echo "CLUSTERS = $clusters"
+
+	cmd="$K1_TOOLCHAIN_DIR/bin/k1-create-multibinary"
+	cmd="$cmd --boot $boot"
+	if [[ ! -z $ios ]];
+	then
+		cmd="$cmd --ios=$ios"
+	fi
+
+	if [[ ! -z $clusters ]];
+	then
+		cmd="$cmd --clusters=$clusters"
+	fi
+	cmd="$cmd -T $image -f"
+
+	$cmd
 }
 
 #
@@ -55,36 +95,39 @@ function build
 #
 function run
 {
-	local image=$1
-	local bindir=$2
-	local bin=$3
-	local target=$4
-	local variant=$5
-	local mode=$6
-	local timeout=$7
-	local args=$8
-	local execfile=""
+	local image=$1    # Multibinary image.
+	local bindir=$2   # Binary directory.
+	local target=$3   # Target (unused).
+	local variant=$4  # Cluster variant (unused)
+	local mode=$5     # Spawn mode (run or debug).
+	local timeout=$6  # Timeout for test mode.
 
-	case $variant in
-		"all")
-			execfile="--exec-file=IODDR0:$bindir/$bin-k1bio \
-				--exec-file=Cluster0:$bindir/$bin-k1bdp"
-			;;
-		"iocluster")
-			execfile="--exec-file=IODDR0:$bindir/$bin-k1bio"
-			;;
-		"ccluster")
-			execfile="--exec-file=Cluster0:$bindir/$bin-k1bdp"
-			;;
-	esac
+	local execfile="\
+		--exec-file=IODDR0:$bindir/iocluster0.mppa256    \
+		--exec-file=IODDR1:$bindir/iocluster1.mppa256    \
+		--exec-file=Cluster0:$bindir/ccluster0.mppa256   \
+		--exec-file=Cluster1:$bindir/ccluster1.mppa256   \
+		--exec-file=Cluster2:$bindir/ccluster2.mppa256   \
+		--exec-file=Cluster3:$bindir/ccluster3.mppa256   \
+		--exec-file=Cluster4:$bindir/ccluster4.mppa256   \
+		--exec-file=Cluster5:$bindir/ccluster5.mppa256   \
+		--exec-file=Cluster6:$bindir/ccluster6.mppa256   \
+		--exec-file=Cluster7:$bindir/ccluster7.mppa256   \
+		--exec-file=Cluster8:$bindir/ccluster8.mppa256   \
+		--exec-file=Cluster9:$bindir/ccluster9.mppa256   \
+		--exec-file=Cluster10:$bindir/ccluster10.mppa256 \
+		--exec-file=Cluster11:$bindir/ccluster11.mppa256 \
+		--exec-file=Cluster12:$bindir/ccluster12.mppa256 \
+		--exec-file=Cluster13:$bindir/ccluster13.mppa256 \
+		--exec-file=Cluster14:$bindir/ccluster14.mppa256 \
+		--exec-file=Cluster15:$bindir/ccluster15.mppa256"
 
 	if [ $mode == "--debug" ];
 	then
 		$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner \
 			--gdb                            \
 			--multibinary=$image             \
-			$execfile                        \
-			-- $args
+			$execfile
 	else
 		if [ ! -z $timeout ];
 		then
@@ -92,7 +135,6 @@ function run
 			$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner \
 				--multibinary=$image             \
 				$execfile                        \
-				-- $args                         \
 			|& tee $OUTFILE
 			line=$(cat $OUTFILE | tail -1 )
 			if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
@@ -103,10 +145,27 @@ function run
 				return -1
 			fi
 		else
-			$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner \
-				--multibinary=$image             \
-				$execfile                        \
-				-- $args
+			$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner         \
+				--multibinary=$image                     \
+				$execfile                                \
+			|& tee >(grep IODDR0@    > nanvix-cluster-0)  \
+			|& tee >(grep IODDR1@    > nanvix-cluster-1)  \
+			|& tee >(grep Cluster0@  > nanvix-cluster-2)  \
+			|& tee >(grep Cluster1@  > nanvix-cluster-3)  \
+			|& tee >(grep Cluster2@  > nanvix-cluster-4)  \
+			|& tee >(grep Cluster3@  > nanvix-cluster-5)  \
+			|& tee >(grep Cluster4@  > nanvix-cluster-6)  \
+			|& tee >(grep Cluster5@  > nanvix-cluster-7)  \
+			|& tee >(grep Cluster6@  > nanvix-cluster-8)  \
+			|& tee >(grep Cluster7@  > nanvix-cluster-9)  \
+			|& tee >(grep Cluster8@  > nanvix-cluster-10) \
+			|& tee >(grep Cluster9@  > nanvix-cluster-11) \
+			|& tee >(grep Cluster10@ > nanvix-cluster-12) \
+			|& tee >(grep Cluster11@ > nanvix-cluster-13) \
+			|& tee >(grep Cluster12@ > nanvix-cluster-14) \
+			|& tee >(grep Cluster13@ > nanvix-cluster-15) \
+			|& tee >(grep Cluster14@ > nanvix-cluster-16) \
+			|& tee >(grep Cluster15@ > nanvix-cluster-17)
 		fi
 	fi
 }
