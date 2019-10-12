@@ -64,6 +64,7 @@ function usage
 #==============================================================================
 # check_args()
 #==============================================================================
+USERNAME=$(logname 2>/dev/null || echo $SUDO_USER)
 
 #
 # Check script arguments.
@@ -144,13 +145,13 @@ function on_multiple
 		if [ ! -e /dev/net/$TAP_NAME ];
 		then
 			mknod /dev/net/$TAP_NAME c 10 200
-			chown $(id -u):$(id -g) /dev/net/$TAP_NAME
+			chown $USERNAME:$(id -gn $USERNAME) /dev/net/$TAP_NAME
 		fi
 
 		# Create tap interface.
 		if [ ! -e /sys/class/net/$TAP_NAME ];
 		then
-			tunctl -t $TAP_NAME -u $(id -un) > /dev/null
+			tunctl -t $TAP_NAME -u $USERNAME > /dev/null
 		fi
 
 		# Setup tap interface.
