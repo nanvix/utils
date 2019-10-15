@@ -21,9 +21,9 @@
 #
 
 # Arguments
-IMAGE=$1    # Image File Name
-BINDIR=$2   # Binary Directory
-BINARIES=$3 # List of Binaries
+IMAGE=$1   # Image File Name
+BINDIR=$2  # Binary Directory
+IMGSRC=$3  # Image Source
 
 # Global Variables
 export SCRIPT_NAME=$0
@@ -65,7 +65,7 @@ function check_args
 	fi
 
 	# Missing binary file name.
-	if [ -z $BINARIES ] ;
+	if [ -z $IMGSRC ] ;
 	then
 		echo "$SCRIPT_NAME: missing binary file name"
 		exit 1
@@ -91,7 +91,7 @@ then
 	echo "VARIANT     = $VARIANT"
 	echo "IMAGE       = $IMAGE"
 	echo "BINDIR      = $BINDIR"
-	echo "BINARIES    = $BINARIES"
+	echo "IMGSRC      = $IMGSRC"
 	echo "==============================================================================="
 fi
 
@@ -112,4 +112,4 @@ case "$TARGET" in
 esac
 
 # Build multi-binaries.
-build $IMAGE $BINDIR "$BINARIES"
+build $IMAGE $BINDIR $IMGSRC

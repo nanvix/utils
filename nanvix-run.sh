@@ -25,12 +25,11 @@
 # Script Arguments
 IMAGE=$1    # Image File Name
 BINDIR=$2   # Binary Directory
-BINARIES=$3 # List of Binaries
-TARGET=$4   # Target
-VARIANT=$5  # Target Variant
-MODE=$6     # Run Mode
-TIMEOUT=$7  # Timeout
-ARGS=$8     # Image Arguments
+TARGET=$3   # Target
+VARIANT=$4  # Target Variant
+MODE=$5     # Run Mode
+TIMEOUT=$6  # Timeout
+ARGS=$7     # Image Arguments
 
 # Global Variables
 export SCRIPT_NAME=$0
@@ -46,7 +45,7 @@ export OUTFILE="nanvix-cluster"
 #
 function usage
 {
-	echo "$SCRIPT_NAME <image> <bindir> <binary> <target> <target variant> [mode]"
+	echo "$SCRIPT_NAME <image> <bindir> <target> <target variant> [mode]"
 	exit 1
 }
 
@@ -108,7 +107,6 @@ then
 	echo "VARIANT     = $VARIANT"
 	echo "IMAGE       = $IMAGE"
 	echo "BINDIR      = $BINDIR"
-	echo "BINARIES    = $BINARIES"
 	echo "MODE        = $MODE"
 	echo "TIMEOUT     = $TIMEOUT"
 	echo "ARGS        = $ARGS"
@@ -136,4 +134,4 @@ esac
 touch $OUTFILE-0
 truncate -s 0 $OUTFILE*
 
-run $IMAGE $BINDIR "$BINARIES" $TARGET $VARIANT $MODE $TIMEOUT $ARGS
+run $IMAGE $BINDIR $TARGET $VARIANT $MODE $TIMEOUT $ARGS
