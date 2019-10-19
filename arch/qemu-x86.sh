@@ -23,6 +23,11 @@
 #
 
 #
+# GDB Port.
+#
+GDB_PORT=1234
+
+#
 # Sets up development tools.
 #
 function setup_toolchain
@@ -94,8 +99,16 @@ function setup_toolchain
 #
 function build
 {
-	# Nothing to do.
-	echo ""
+	local image=$1
+	local bindir=$2
+	local imgsrc=$3
+
+	# Create multi-binary image.
+	truncate -s 0 $image
+	for binary in `cat $imgsrc`;
+	do
+		echo $binary >> $image
+	done
 }
 
 #
@@ -104,7 +117,6 @@ function build
 #
 function check_network
 {
-
 	if [ -e /sys/class/net/$TAP_NAME ];
 	then
 		echo "Network TAP interface is setup"
@@ -116,65 +128,80 @@ function check_network
 }
 
 #
+# Spawns binaries.
+#
+# $1 Binary directory.
+# $2 Multibinary image.
+# $3 Spawn mode.
+# $4 Timeout.
+#
+function spawn_binaries
+{
+	local bindir=$1
+	local image=$2
+	local mode=$3
+	local timeout=$4
+	local cmd=""
+
+	# Target configuration.
+	local MEMSIZE=128M # Memory Size
+	local IMAGE_ID=1   # Image ID
+
+	check_network
+
+	let i=0
+
+	qemu_cmd="qemu-system-i386
+			-serial stdio
+			-display curses
+			-m $MEMSIZE
+			-mem-prealloc"
+
+	for binary in `cat $image`;
+	do
+
+		local tapname="nanvix-tap"$IMAGE_ID
+		local mac="52:55:00:d1:55:0"$IMAGE_ID
+
+		cmd="$qemu_cmd -gdb tcp::$GDB_PORT"
+		cmd="$cmd -kernel $bindir/$binary"
+		cmd="$cmd -netdev tap,id=t0,ifname=$tapname,script=no,downscript=no"
+		cmd="$cmd -device rtl8139,netdev=t0,id=nic0,mac=$mac"
+
+		# Spawn cluster.
+		if [ $mode == "--debug" ];
+		then
+			cmd="$cmd -S"
+			$cmd
+		else
+			$cmd
+		fi
+
+		let i++
+		let IMAGE_ID++
+		let GDB_PORT++
+
+		# No multicluster spawn.
+		break
+
+	done
+}
+
+#
 # Runs a binary in the platform (simulator).
 #
 function run
 {
-	local image=$1
-	local bindir=$2
-	local binary=$3
-	local target=$4
-	local variant=$5
-	local mode=$6
-	local timeout=$7
+	
+	local image=$1    # Multibinary image.
+	local bindir=$2   # Binary directory.
+	local target=$3   # Target (unused).
+	local variant=$4  # Cluster variant (unused)
+	local mode=$5     # Spawn mode (run or debug).
+	local timeout=$6  # Timeout for test mode.
+	local ret=0       # Return value.
 
-	# be careful changing those values, they are also hard coded in the qemu-x86.sh script
-	# but I don't know the proper way to make them dependant.
-	local mac=52:55:00:d1:55:01
-	local TAP_NAME=nanvix-tap1
+	spawn_binaries $bindir $image $mode
 
-	check_network
-
-	# Target configuration.
-	local MEMSIZE=128M # Memory Size
-
-	if [ $mode == "--debug" ];
-	then
-		qemu-system-i386 -s -S      \
-			--display curses        \
-			-kernel $bindir/$binary \
-			-m $MEMSIZE             \
-			-mem-prealloc			\
-			-netdev tap,id=t0,ifname=$TAP_NAME,script=no,downscript=no \
-			-device rtl8139,netdev=t0,id=nic0,mac=$mac
-	else
-		if [ ! -z $timeout ];
-		then
-			timeout --foreground  $timeout \
-			qemu-system-i386 -s         \
-				--display curses        \
-				-kernel $bindir/$binary \
-				-m $MEMSIZE             \
-				-mem-prealloc			\
-				-netdev tap,id=t0,ifname=$TAP_NAME,script=no,downscript=no \
-				-device rtl8139,netdev=t0,id=nic0,mac=$mac \
-			|& tee $OUTFILE
-			line=$(cat $OUTFILE | tail -2 | head -1)
-			if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
-			then
-				echo "Succeed !"
-			else
-				echo "Failed !"
-				return -1
-			fi
-		else
-			qemu-system-i386 -s         \
-				--display curses        \
-				-kernel $bindir/$binary \
-				-m $MEMSIZE             \
-				-mem-prealloc			\
-				-netdev tap,id=t0,ifname=$TAP_NAME,script=no,downscript=no \
-				-device rtl8139,netdev=t0,id=nic0,mac=$mac
-		fi
-	fi
+	return $ret
 }
