@@ -22,6 +22,9 @@
 # SOFTWARE.
 #
 
+export OBJCOPY="or1k-elf-objcopy"
+export BIN2VMEM="/opt/optimsoc/bin2vmem"
+
 #
 # Sets up development tools.
 #
@@ -36,8 +39,19 @@ function setup_toolchain
 #
 function build
 {
-	# Nothing to do.
-	echo ""
+	local image=$1
+	local bindir=$2
+	local imgsrc=$3
+
+	# Create multi-binary image.
+	truncate -s 0 $image
+	for binary in `cat $imgsrc`;
+	do
+		filename=`echo $binary | cut -d "." -f 1`
+		$OBJCOPY -O binary $bindir/$binary $bindir/$filename.bin
+		$BIN2VMEM $bindir/$filename.bin > $bindir/$filename.vmem
+		echo "$filename.vmem" >> $image
+	done
 }
 
 #
