@@ -22,6 +22,10 @@
 # SOFTWARE.
 #
 
+export OBJCOPY="or1k-elf-objcopy"
+export BIN2VMEM="/opt/optimsoc/bin2vmem"
+export BLUEDRAGON="/opt/bluedragon/bluedragon"
+
 #
 # Sets up development tools.
 #
@@ -36,14 +40,48 @@ function setup_toolchain
 #
 function build
 {
-	# Nothing to do.
-	echo ""
+	local image=$1
+	local bindir=$2
+	local imgsrc=$3
+
+	# Create multi-binary image.
+	truncate -s 0 $image
+	for binary in `cat $imgsrc`;
+	do
+		filename=`echo $binary | cut -d "." -f 1`
+		$OBJCOPY -O binary $bindir/$binary $bindir/$filename.bin
+		$BIN2VMEM $bindir/$filename.bin > $bindir/$filename.vmem
+		echo "$filename.vmem" >> $image
+	done
 }
 
 #
 # Runs a binary in the platform (simulator).
 #
 function run
+{
+	local image=$1    # Multibinary image.
+	local bindir=$2   # Binary directory.
+	local target=$3   # Target (unused).
+	local variant=$4  # Cluster variant (unused)
+	local mode=$5     # Spawn mode (run or debug).
+	local timeout=$6  # Timeout for test mode.
+
+	binary=`head -n 1 $image`
+
+	if [ ! -z $timeout ];
+	then
+		timeout --foreground $timeout \
+		$BLUEDRAGON --meminit=$bindir/$binary
+	else
+		$BLUEDRAGON --meminit=$bindir/$binary
+	fi
+}
+
+#
+# Runs a binary in the platform (hardware).
+#
+function run_hw
 {
 	local binary=$3
 	local mode=$6
