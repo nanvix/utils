@@ -50,15 +50,19 @@ function build
 	do
 		clusterid=`echo $binary | cut -d ":" -f 1`
 		bin=`echo $binary | cut -d ":" -f 2`
+		imgdir=`echo $bin | cut -d "." -f 1`
+
+		# Create binary folder for current image.
+		mkdir -p $bindir/$imgdir
 
 		# Rename binary.
-		cp $bindir/$bin $bindir/$clusterid.mppa256
+		cp $bindir/$bin $bindir/$imgdir/$clusterid.mppa256
 
 		if [[ "$bin" = *"k1bdp" ]];
 		then
-			clusters="bin/$clusterid.mppa256,$clusters"
+			clusters="bin/$imgdir/$clusterid.mppa256,$clusters"
 		else
-			ios="bin/$clusterid.mppa256,$ios"
+			ios="bin/$imgdir/$clusterid.mppa256,$ios"
 		fi
 	done
 
@@ -101,6 +105,9 @@ function run
 	local variant=$4  # Cluster variant (unused)
 	local mode=$5     # Spawn mode (run or debug).
 	local timeout=$6  # Timeout for test mode.
+
+	# Concatenates bindir with current imgdir folder
+	bindir="$bindir/`echo $image | cut -d "." -f 1`"
 
 	local execfile="\
 		--exec-file=IODDR0:$bindir/iocluster0.mppa256    \
