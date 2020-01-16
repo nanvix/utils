@@ -24,7 +24,8 @@
 
 export OBJCOPY="or1k-elf-objcopy"
 export BIN2VMEM="/opt/optimsoc/bin2vmem"
-export BLUEDRAGON="/opt/bluedragon/bluedragon"
+export BLUEDRAGON="/opt/optimsoc/bluedragon4-kcore"
+export TIMEOUT=360
 
 #
 # Sets up development tools.
@@ -56,6 +57,27 @@ function build
 }
 
 #
+# Parses an execution output.
+#
+# $1 Output file.
+#
+function parse_output
+{
+	local outfile=$1
+
+	line=$(cat $outfile | tail -1)
+	if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
+	then
+		echo "Succeed !"
+	else
+		echo "Failed !"
+		return -1
+	fi
+
+	return 0
+}
+
+#
 # Runs a binary in the platform (simulator).
 #
 function run
@@ -66,16 +88,19 @@ function run
 	local variant=$4  # Cluster variant (unused)
 	local mode=$5     # Spawn mode (run or debug).
 	local timeout=$6  # Timeout for test mode.
+	local cmd=""
 
 	binary=`head -n 1 $image`
 
-	if [ ! -z $timeout ];
-	then
-		timeout --foreground $timeout \
-		$BLUEDRAGON --meminit=$bindir/$binary
-	else
-		$BLUEDRAGON --meminit=$bindir/$binary
-	fi
+	cmd="$BLUEDRAGON --meminit=$bindir/$binary"
+	cmd="timeout --foreground $TIMEOUT $cmd"
+
+	$cmd |& tee $OUTFILE-0 &
+
+	# Parse output.
+	wait
+	parse_output stdout.000
+	ret=$?
 }
 
 #
