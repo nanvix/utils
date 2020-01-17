@@ -38,7 +38,8 @@ function setup_toolchain
 #
 function build
 {
-	local image=$1
+	local image=`basename $1`
+	local imgpath=$1
 	local bindir=$2
 	local imgsrc=$3
 	local ios=""
@@ -50,7 +51,7 @@ function build
 	do
 		clusterid=`echo $binary | cut -d ":" -f 1`
 		bin=`echo $binary | cut -d ":" -f 2`
-		imgdir=`echo $bin | cut -d "." -f 1`
+		imgdir=`echo $image | cut -d "." -f 1`
 
 		# Create binary folder for current image.
 		mkdir -p $bindir/$imgdir
@@ -89,7 +90,7 @@ function build
 	then
 		cmd="$cmd --clusters=$clusters"
 	fi
-	cmd="$cmd -T $image -f"
+	cmd="$cmd -T $imgpath -f"
 
 	$cmd
 }
@@ -107,27 +108,27 @@ function run
 	local timeout=$6  # Timeout for test mode.
 
 	# Concatenates bindir with current imgdir folder
-	bindir="$bindir/`echo $image | cut -d "." -f 1`"
+	imgdir="$bindir/`echo $image | cut -d "." -f 1`"
 
 	local execfile="\
-		--exec-file=IODDR0:$bindir/iocluster0.mppa256    \
-		--exec-file=IODDR1:$bindir/iocluster1.mppa256    \
-		--exec-file=Cluster0:$bindir/ccluster0.mppa256   \
-		--exec-file=Cluster1:$bindir/ccluster1.mppa256   \
-		--exec-file=Cluster2:$bindir/ccluster2.mppa256   \
-		--exec-file=Cluster3:$bindir/ccluster3.mppa256   \
-		--exec-file=Cluster4:$bindir/ccluster4.mppa256   \
-		--exec-file=Cluster5:$bindir/ccluster5.mppa256   \
-		--exec-file=Cluster6:$bindir/ccluster6.mppa256   \
-		--exec-file=Cluster7:$bindir/ccluster7.mppa256   \
-		--exec-file=Cluster8:$bindir/ccluster8.mppa256   \
-		--exec-file=Cluster9:$bindir/ccluster9.mppa256   \
-		--exec-file=Cluster10:$bindir/ccluster10.mppa256 \
-		--exec-file=Cluster11:$bindir/ccluster11.mppa256 \
-		--exec-file=Cluster12:$bindir/ccluster12.mppa256 \
-		--exec-file=Cluster13:$bindir/ccluster13.mppa256 \
-		--exec-file=Cluster14:$bindir/ccluster14.mppa256 \
-		--exec-file=Cluster15:$bindir/ccluster15.mppa256"
+		--exec-file=IODDR0:$imgdir/iocluster0.mppa256    \
+		--exec-file=IODDR1:$imgdir/iocluster1.mppa256    \
+		--exec-file=Cluster0:$imgdir/ccluster0.mppa256   \
+		--exec-file=Cluster1:$imgdir/ccluster1.mppa256   \
+		--exec-file=Cluster2:$imgdir/ccluster2.mppa256   \
+		--exec-file=Cluster3:$imgdir/ccluster3.mppa256   \
+		--exec-file=Cluster4:$imgdir/ccluster4.mppa256   \
+		--exec-file=Cluster5:$imgdir/ccluster5.mppa256   \
+		--exec-file=Cluster6:$imgdir/ccluster6.mppa256   \
+		--exec-file=Cluster7:$imgdir/ccluster7.mppa256   \
+		--exec-file=Cluster8:$imgdir/ccluster8.mppa256   \
+		--exec-file=Cluster9:$imgdir/ccluster9.mppa256   \
+		--exec-file=Cluster10:$imgdir/ccluster10.mppa256 \
+		--exec-file=Cluster11:$imgdir/ccluster11.mppa256 \
+		--exec-file=Cluster12:$imgdir/ccluster12.mppa256 \
+		--exec-file=Cluster13:$imgdir/ccluster13.mppa256 \
+		--exec-file=Cluster14:$imgdir/ccluster14.mppa256 \
+		--exec-file=Cluster15:$imgdir/ccluster15.mppa256"
 
 	if [ $mode == "--debug" ];
 	then
