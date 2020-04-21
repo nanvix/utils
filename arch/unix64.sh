@@ -25,7 +25,7 @@
 #
 # Number of clusters (deprecated).
 #
-NCLUSTERS=18
+NCLUSTERS=12
 
 #
 # Boot delay.
