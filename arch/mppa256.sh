@@ -95,6 +95,35 @@ function build
 	$cmd
 }
 
+function parse
+{
+	local outfile=$1
+	local failed='failed|FAILED|Failed'
+	local success='false'
+
+	while read -r line;
+	do
+		if [[ $line =~ $failed ]]; then
+			echo "Failed !"
+			return 255
+		fi
+
+		if [[ $line = *"IODDR0@0.0: RM 0: [hal] powering off"* ]]; then
+			success='true'
+		fi
+	done < "$outfile"
+
+	if [[ $success == true ]];
+	then
+		echo "Succeed !"
+	else
+		echo "Failed !"
+		return 255
+	fi
+
+	return 0
+}
+
 #
 # Runs a binary in the platform.
 #
@@ -144,14 +173,8 @@ function run
 				--multibinary=$image             \
 				$execfile                        \
 			|& tee $OUTFILE
-			line=$(cat $OUTFILE | tail -1 )
-			if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
-			then
-				echo "Succeed !"
-			else
-				echo "Failed !"
-				return -1
-			fi
+
+			parse $OUTFILE
 		else
 			$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner         \
 				--multibinary=$image                     \
