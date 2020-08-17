@@ -75,6 +75,20 @@ case "$DISTRO" in
 			texinfo        \
 			zlib
         ;;
+    *"fedora"*)
+        dnf install -y \
+			make		\
+			automake	\
+			autoconf	\
+			g++		\
+			bison		\
+			ncurses-devel	\
+			glib2-devel	\
+			pixman-devel	\
+			texinfo		\
+			flex		\
+			SDL2-devel	\
+        ;;
     *)
         echo "Warning: your distro is not officially supported"
 esac
