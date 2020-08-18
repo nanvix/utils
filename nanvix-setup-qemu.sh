@@ -23,8 +23,8 @@
 #
 
 # Build and install variables.
-export CURDIR=`pwd`
-export WORKDIR=$CURDIR/toolchain/qemu
+export SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
+export WORKDIR=$SCRIPT_DIR/toolchain/qemu
 export PREFIX=$WORKDIR
 
 # QEMU Version
