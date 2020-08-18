@@ -41,7 +41,7 @@ function setup_toolchain
 {
 	# Required variables.
 	local CURDIR=`pwd`
-	local WORKDIR=$CURDIR/toolchain/or1k
+	local WORKDIR=$SCRIPT_DIR/toolchain/or1k
 	local PREFIX=$WORKDIR
 	local TARGET=or1k-elf
 	local COMMIT=ccfd3f43e29a0b02249ffb3a256330a3717cca18

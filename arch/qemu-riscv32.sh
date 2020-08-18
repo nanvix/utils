@@ -41,7 +41,7 @@ function setup_toolchain
 {
 	# Required variables.
 	local CURDIR=`pwd`
-	local WORKDIR=$CURDIR/toolchain/riscv32
+	local WORKDIR=$SCRIPT_DIR/toolchain/riscv32
 	local PREFIX=$WORKDIR
 	local TARGET=riscv32-elf
 	local COMMIT=ab8b80604f02db4b00af24302bc9d20ebfcdd911
