@@ -73,14 +73,25 @@ function build
 function parse_output
 {
 	local outfile=$1
+	local failed='failed|FAILED|Failed'
+	local success='false'
 
-	line=$(cat $outfile | tail -1)
-	if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
+	while read -r line;
+	do
+		if [[ $line =~ $failed ]];
+		then
+			return 255
+		fi
+
+		if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
+		then
+			success='true'
+		fi
+	done < "$outfile"
+
+	if [[ $success != true ]];
 	then
-		echo "Succeed !"
-	else
-		echo "Failed !"
-		return -1
+		return 255
 	fi
 
 	return 0
@@ -158,8 +169,16 @@ function run
 		# Parse output.
 		wait
 
-		parse_output $OUTFILE-0
-		ret=$?
+		for outfile in $OUTFILE-*;
+		do
+			parse_output $outfile
+			ret=$?
+
+			if [ $ret == 255 ];
+			then
+				break
+			fi
+		done
 
 	# Run/Debug
 	else
@@ -171,6 +190,14 @@ function run
 	# House keeping.
 	rm -rf /dev/mqueue/*nanvix*
 	rm -rf /dev/shm/*nanvix*
+
+	# Print result
+	if [ $ret == 0 ];
+	then
+		echo "Succeed !"
+	else
+		echo "Failed !"
+	fi
 
 	return $ret
 }
