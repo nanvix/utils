@@ -126,17 +126,60 @@ function build
 function parse_output
 {
 	local outfile=$1
+	local failed='failed|FAILED|Failed'
+	local success='false'
 
-	line=$(cat $outfile | tail -1)
-	if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
+	while read -r line;
+	do
+		if [[ $line =~ $failed ]];
+		then
+			return 255
+		fi
+
+		if [[ "$line" = *"powering off"* ]] || [[ $line == *"halting"* ]];
+		then
+			success='true'
+		fi
+	done < "$outfile"
+
+	if [[ $success != true ]];
+	then
+		return 255
+	fi
+
+	return 0
+}
+
+#
+# Parses all execution outputs.
+#
+# $1 Output file.
+#
+function parse_outputs
+{
+	local base_outfile=$1
+	local ret=0
+
+	for outfile in $base_outfile-*;
+	do
+		parse_output $outfile
+		ret=$?
+
+		if [ $ret == 255 ];
+		then
+			break
+		fi
+	done
+
+	# Print result
+	if [ $ret == 0 ];
 	then
 		echo "Succeed !"
 	else
 		echo "Failed !"
-		return -1
 	fi
 
-	return 0
+	return $ret
 }
 
 #
@@ -222,7 +265,7 @@ function run
 		# Parse output.
 		wait
 
-		parse_output $OUTFILE-0
+		parse_outputs $OUTFILE
 		ret=$?
 
 	# Run/Debug

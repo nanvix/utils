@@ -98,6 +98,38 @@ function parse_output
 }
 
 #
+# Parses all execution outputs.
+#
+# $1 Output file.
+#
+function parse_outputs
+{
+	local base_outfile=$1
+	local ret=0
+
+	for outfile in $base_outfile-*;
+	do
+		parse_output $outfile
+		ret=$?
+
+		if [ $ret == 255 ];
+		then
+			break
+		fi
+	done
+
+	# Print result
+	if [ $ret == 0 ];
+	then
+		echo "Succeed !"
+	else
+		echo "Failed !"
+	fi
+
+	return $ret
+}
+
+#
 # Spawns binaries.
 #
 # $1 Binary directory.
@@ -169,16 +201,8 @@ function run
 		# Parse output.
 		wait
 
-		for outfile in $OUTFILE-*;
-		do
-			parse_output $outfile
-			ret=$?
-
-			if [ $ret == 255 ];
-			then
-				break
-			fi
-		done
+		parse_outputs $OUTFILE
+		ret=$?
 
 	# Run/Debug
 	else
@@ -190,14 +214,6 @@ function run
 	# House keeping.
 	rm -rf /dev/mqueue/*nanvix*
 	rm -rf /dev/shm/*nanvix*
-
-	# Print result
-	if [ $ret == 0 ];
-	then
-		echo "Succeed !"
-	else
-		echo "Failed !"
-	fi
 
 	return $ret
 }
