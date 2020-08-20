@@ -95,7 +95,7 @@ function build
 	$cmd
 }
 
-function parse
+function parse_outputs
 {
 	local outfile=$1
 	local failed='failed|FAILED|Failed'
@@ -103,12 +103,14 @@ function parse
 
 	while read -r line;
 	do
-		if [[ $line =~ $failed ]]; then
+		if [[ $line =~ $failed ]];
+		then
 			echo "Failed !"
 			return 255
 		fi
 
-		if [[ $line = *"IODDR0@0.0: RM 0: [hal] powering off"* ]]; then
+		if [[ $line = *"IODDR0@0.0: RM 0: [hal] powering off"* ]];
+		then
 			success='true'
 		fi
 	done < "$outfile"
@@ -174,7 +176,7 @@ function run
 				$execfile                        \
 			|& tee $OUTFILE
 
-			parse $OUTFILE
+			parse_outputs $OUTFILE
 		else
 			$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner         \
 				--multibinary=$image                     \
