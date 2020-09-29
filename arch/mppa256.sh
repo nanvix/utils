@@ -141,25 +141,23 @@ function run
 	# Concatenates bindir with current imgdir folder
 	imgdir="$bindir/`echo $image | cut -d "." -f 1`"
 
-	local execfile="\
-		--exec-file=IODDR0:$imgdir/iocluster0.mppa256    \
-		--exec-file=IODDR1:$imgdir/iocluster1.mppa256    \
-		--exec-file=Cluster0:$imgdir/ccluster0.mppa256   \
-		--exec-file=Cluster1:$imgdir/ccluster1.mppa256   \
-		--exec-file=Cluster2:$imgdir/ccluster2.mppa256   \
-		--exec-file=Cluster3:$imgdir/ccluster3.mppa256   \
-		--exec-file=Cluster4:$imgdir/ccluster4.mppa256   \
-		--exec-file=Cluster5:$imgdir/ccluster5.mppa256   \
-		--exec-file=Cluster6:$imgdir/ccluster6.mppa256   \
-		--exec-file=Cluster7:$imgdir/ccluster7.mppa256   \
-		--exec-file=Cluster8:$imgdir/ccluster8.mppa256   \
-		--exec-file=Cluster9:$imgdir/ccluster9.mppa256   \
-		--exec-file=Cluster10:$imgdir/ccluster10.mppa256 \
-		--exec-file=Cluster11:$imgdir/ccluster11.mppa256 \
-		--exec-file=Cluster12:$imgdir/ccluster12.mppa256 \
-		--exec-file=Cluster13:$imgdir/ccluster13.mppa256 \
-		--exec-file=Cluster14:$imgdir/ccluster14.mppa256 \
-		--exec-file=Cluster15:$imgdir/ccluster15.mppa256"
+	# Initial exec file
+	local execfile=""
+
+	# Populate exec file with current available binaries
+	for cluster in `ls $imgdir | grep -o "[c-o]cluster[0-9]*[0-9]\."`;
+	do
+		type=`echo ${cluster: 0:1}`
+		number=`echo ${cluster: -2:1}`
+
+		if [ $type == "c" ]; then
+			execfile="$execfile \
+				--exec-file=Cluster$number:$imgdir/ccluster$number.mppa256"
+		else
+			execfile="$execfile \
+				--exec-file=IODDR$number:$imgdir/iocluster$number.mppa256"
+		fi
+	done
 
 	if [ $mode == "--debug" ];
 	then
