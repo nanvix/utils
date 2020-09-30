@@ -148,7 +148,7 @@ function run
 	for cluster in `ls $imgdir | grep -o "[c-o]cluster[0-9]*[0-9]\."`;
 	do
 		type=`echo ${cluster: 0:1}`
-		number=`echo ${cluster: -2:1}`
+		number=`echo $cluster | grep -Eo "[0-9]{1,2}"`
 
 		if [ $type == "c" ]; then
 			execfile="$execfile \
