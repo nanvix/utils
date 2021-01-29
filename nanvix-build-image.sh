@@ -100,6 +100,7 @@ case "$TARGET" in
 	"qemu-x86"      | \
 	"qemu-openrisc" | \
 	"qemu-riscv32"  | \
+	"qemu-arm64"    | \
 	"unix64"        | \
 	"mppa256"       | \
 	"optimsoc")

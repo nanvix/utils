@@ -44,7 +44,7 @@ rm -f qemu-$QEMU_VERSION.tar.bz2
 
 # Build qemu
 cd qemu-$QEMU_VERSION
-./configure --prefix=$PREFIX --target-list=i386-softmmu,or1k-softmmu,riscv32-softmmu --enable-sdl --enable-curses
+./configure --prefix=$PREFIX --target-list=i386-softmmu,or1k-softmmu,riscv32-softmmu,aarch64-softmmu --enable-sdl --enable-curses
 make -j $NCORES all
 make install
 
