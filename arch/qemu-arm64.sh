@@ -44,7 +44,7 @@ function setup_toolchain
 	local WORKDIR=$SCRIPT_DIR/toolchain/arm64
 	local PREFIX=$WORKDIR
 	local TARGET=aarch64-elf
-	local COMMIT=6e34b27d34d124fc5e40ea6c2def75bdeb4d7f6f
+	local COMMIT=8d501d2f4a3358aec602f2e84fed63370d12f05a
 	
 	# Retrieve the number of processor cores
 	local NCORES=`grep -c ^processor /proc/cpuinfo`
