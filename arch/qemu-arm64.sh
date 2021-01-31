@@ -44,7 +44,7 @@ function setup_toolchain
 	local WORKDIR=$SCRIPT_DIR/toolchain/arm64
 	local PREFIX=$WORKDIR
 	local TARGET=aarch64-elf
-	local COMMIT=ab8b80604f02db4b00af24302bc9d20ebfcdd911
+	local COMMIT=6e34b27d34d124fc5e40ea6c2def75bdeb4d7f6f
 	
 	# Retrieve the number of processor cores
 	local NCORES=`grep -c ^processor /proc/cpuinfo`
@@ -89,7 +89,9 @@ function setup_toolchain
 	# Build GDB.
 	cd $WORKDIR
 	cd gdb*/
-	./configure --target=$TARGET --prefix=$PREFIX --with-auto-load-safe-path=/ --with-guile=no
+	mkdir build
+	cd build
+	../configure --target=$TARGET --prefix=$PREFIX --with-auto-load-safe-path=/ --with-guile=no
 	make -j $NCORES
 	make install
 
