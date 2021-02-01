@@ -207,7 +207,7 @@ function spawn_binaries
 
 	qemu_cmd="qemu-system-aarch64
 			-machine virt
-            -cpu cortex-a57
+			-cpu cortex-a53
 			-serial stdio
 			-display none
 			-m $MEMSIZE
