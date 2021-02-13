@@ -159,6 +159,16 @@ function run
 		fi
 	done
 
+	if [ $NANVIX_PROFILE == "true" ];
+	then
+		$TOOLCHAIN_DIR/bin/k1-power -s                                 \
+			--refresh-rate=0.1                                         \
+			--profile=mppa0_pwr,mppa0_temp,plx_temp,ddr0_pwr,ddr1_pwr  \
+			--traces_keep --output=$PWD                                \
+		> /dev/null &
+		K1_POWER_PID=$!
+	fi
+
 	if [ $mode == "--debug" ];
 	then
 		$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner \
@@ -176,9 +186,9 @@ function run
 
 			parse_outputs $OUTFILE
 		else
-			$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner         \
-				--multibinary=$image                     \
-				$execfile                                \
+			$K1_TOOLCHAIN_DIR/bin/k1-jtag-runner          \
+				--multibinary=$image                      \
+				$execfile                                 \
 			|& tee >(grep IODDR0@    > nanvix-cluster-0)  \
 			|& tee >(grep IODDR1@    > nanvix-cluster-1)  \
 			|& tee >(grep Cluster0@  > nanvix-cluster-2)  \
@@ -198,6 +208,11 @@ function run
 			|& tee >(grep Cluster14@ > nanvix-cluster-16) \
 			|& tee >(grep Cluster15@ > nanvix-cluster-17)
 		fi
+	fi
+
+	if [ $NANVIX_PROFILE == "true" ];
+	then
+		kill -SIGKILL $K1_POWER_PID
 	fi
 }
 
