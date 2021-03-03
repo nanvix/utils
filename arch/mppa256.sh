@@ -161,7 +161,7 @@ function run
 
 	if [ $NANVIX_PROFILE == "true" ];
 	then
-		$TOOLCHAIN_DIR/bin/k1-power -s                                 \
+		$K1_TOOLCHAIN_DIR/bin/k1-power -s                              \
 			--refresh-rate=0.1                                         \
 			--profile=mppa0_pwr,mppa0_temp,plx_temp,ddr0_pwr,ddr1_pwr  \
 			--traces_keep --output=$PWD                                \
