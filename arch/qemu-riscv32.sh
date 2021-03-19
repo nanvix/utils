@@ -44,8 +44,8 @@ function setup_toolchain
 	local WORKDIR=$SCRIPT_DIR/toolchain/riscv32
 	local PREFIX=$WORKDIR
 	local TARGET=riscv32-elf
-	local COMMIT=ab8b80604f02db4b00af24302bc9d20ebfcdd911
-	
+	local COMMIT=a8fd4d64cde3f7391e6943f15826f627ce527b4d
+
 	# Retrieve the number of processor cores
 	local NCORES=`grep -c ^processor /proc/cpuinfo`
 
@@ -76,7 +76,7 @@ function setup_toolchain
 	./contrib/download_prerequisites
 	mkdir build
 	cd build
-	../configure --target=$TARGET --prefix=$PREFIX --disable-nls --enable-languages=c --without-headers --disable-multilib
+	../configure --target=$TARGET --prefix=$PREFIX --disable-nls --enable-languages=c --without-headers --disable-multilib --enable-libgomp
 	make -j $NCORES all-gcc
 	make -j $NCORES all-target-libgcc
 	make install-gcc
