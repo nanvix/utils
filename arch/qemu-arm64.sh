@@ -22,6 +22,8 @@
 # SOFTWARE.
 #
 
+export OBJCOPY="aarch64-elf-objcopy"
+
 #
 # Boot delay.
 #
@@ -116,6 +118,7 @@ function build
 	truncate -s 0 $image
 	for binary in `cat $imgsrc`;
 	do
+		$OBJCOPY -O binary $bindir/$binary $bindir/$binary.bin
 		echo $binary >> $image
 	done
 }
