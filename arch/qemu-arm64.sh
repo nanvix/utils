@@ -217,7 +217,7 @@ function spawn_binaries
 	for binary in `cat $image`;
 	do
 		cmd="$qemu_cmd -gdb tcp::$GDB_PORT"
-		cmd="$cmd -kernel $bindir/$binary"
+		cmd="$cmd -kernel $bindir/$binary.bin"
 
 		echo "spawning $binary..."
 
