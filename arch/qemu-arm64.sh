@@ -22,8 +22,6 @@
 # SOFTWARE.
 #
 
-export OBJCOPY="aarch64-elf-objcopy"
-
 #
 # Boot delay.
 #
@@ -118,7 +116,6 @@ function build
 	truncate -s 0 $image
 	for binary in `cat $imgsrc`;
 	do
-		$OBJCOPY -O binary $bindir/$binary $bindir/$binary.bin
 		echo $binary >> $image
 	done
 }
@@ -220,7 +217,7 @@ function spawn_binaries
 	for binary in `cat $image`;
 	do
 		cmd="$qemu_cmd -gdb tcp::$GDB_PORT"
-		cmd="$cmd -kernel $bindir/$binary.bin"
+		cmd="$cmd -kernel $bindir/$binary"
 
 		echo "spawning $binary..."
 
